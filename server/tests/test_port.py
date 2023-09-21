@@ -38,3 +38,7 @@ class TestGetPort(unittest.TestCase):
       result = get_port()
     
     self.assertEqual(result, 1357)
+
+
+if __name__ == '__main__':
+  unittest.main()
