@@ -38,4 +38,10 @@ class DB:
             PRIMARY KEY (ID, FileName)
           )
         ''')
+
+    def get_clients(self):
+      pass
+
+    def get_files(self):
+      pass
          
