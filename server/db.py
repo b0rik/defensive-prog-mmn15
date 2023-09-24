@@ -1,8 +1,6 @@
 import sqlite3
 
-
 class DB:
-    
     def __init__(self, db_name):
       self.connection = sqlite3.connect(
         db_name, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
@@ -16,19 +14,21 @@ class DB:
       print('Created files table.')
 
     def create_clients_table(self):
-       with self.connection.cursor() as cursor:
+       with self.connection as conn:
+        cursor = conn.cursor()
         cursor.execute('''
           CREATE TABLE IF NOT EXISTS clients (
             ID VARCHAR(16) PRIMARY KEY,
             Name VARCHAR(255),
             PublicKey VARCHAR(160),
             LastSeen TIMESTAMP,
-            AESKey VARCHAR(16),
+            AESKey VARCHAR(16)
           )
         ''')
 
     def create_files_table(self):
-      with self.connection.cursor() as cursor:
+      with self.connection as conn:
+        cursor = conn.cursor()
         cursor.execute('''
           CREATE TABLE IF NOT EXISTS files (
             ID VARCHAR(16),
@@ -40,8 +40,34 @@ class DB:
         ''')
 
     def get_clients(self):
-      pass
+      with self.connection as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+          SELECT * FROM clients
+        ''')
+        return cursor.fetchall()
 
     def get_files(self):
-      pass
+      with self.connection as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+          SELECT * FROM files
+        ''')
+        return cursor.fetchall()
+    
+    def insert_client(self, client):
+      with self.connection as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+          INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
+          VALUES (?, ?, ?, ?, ?)
+        ''', client)
+    
+    def insert_file(self, file):
+      with self.connection as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+          INSERT INTO files (ID, FileName, PathName, Verified)
+          VALUES (?, ?, ?, ?)
+        ''', file)
          

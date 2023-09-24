@@ -4,6 +4,7 @@ from request_file_payload import RequestFilePayload
 from request_public_key_payload import RequestPublicKeyPayload
 from request_send_file_payload import RequestSendFilePayload
 from request_user_payload import RequestUserPayload
+from message import Message
 
 PROTOCOL_HEADER_FORMAT = '< 16s B H I'
 PROTOCOL_PAYLOAD_1025_FORMAT = PROTOCOL_PAYLOAD_1027_FORMAT = '<255s'
@@ -45,5 +46,11 @@ class DataParser:
   def parse_data(self):
     self.parse_header()
     self.parse_payload()
+    self.message = Message(self.header, self.payload)
+
+  def get_message(self):
+    return self.message
+
+  
 
   
