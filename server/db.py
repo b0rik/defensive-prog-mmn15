@@ -58,11 +58,17 @@ class DB:
     
     def insert_client(self, client):
       with self.connection as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-          INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
-          VALUES (?, ?, ?, ?, ?)
-        ''', client)
+        try:
+          cursor = conn.cursor()
+          cursor.execute('''
+            INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
+            VALUES (?, ?, ?, ?, ?)
+          ''', client)
+        except Exception as e:
+          print(f'Error: {e} on client {client[0]}:{client[1]}')
+          return False
+      
+      return True
     
     def insert_file(self, file):
       with self.connection as conn:
@@ -73,31 +79,28 @@ class DB:
         ''', file)
 
     def update_client(self, client):
+      id, name, public_key, last_seen, aes_key = client
+      with self.connection as conn:
+        try:
+          cursor = conn.cursor()
+          cursor.execute('''
+            UPDATE clients
+            SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
+            WHERE ID = ?
+          ''', name, public_key, last_seen, aes_key, id)
+        except Exception as e:
+          print(f'Error: {e} on client {id}:{name}')
+          return False
+        
+      return True
+
+    def update_file(self, file):
+      client_id, file_name, path_name, verified = file
       with self.connection as conn:
         cursor = conn.cursor()
         cursor.execute('''
-          UPDATE clients
-          SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
-          WHERE ID = ?
-        ''', client[1:], client[0])
+          UPDATE files
+          SET PathName = ?, Verified = ?
+          WHERE ID = ? AND FileName = ?
+        ''', path_name, verified, client_id, file_name)
 
-
-        # cursor.execute('''
-        #   SELECT * FROM clients
-        #   WHERE ID = ?
-        # ''', id)
-
-        # _, name, public_key, _, aes_key = cursor.fetchone()
-        # name = new_name if new_name else name
-        # public_key = new_public_key if new_public_key else public_key
-        # aes_key = new_aes_key if new_aes_key else aes_key
-        # last_seen = datetime.now()
-        
-        # cursor.execute('''
-        #   UPDATE clients
-        #   SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
-        #   WHERE ID = ?
-        # ''', (name, public_key, last_seen, aes_key, id))
-
-
-         

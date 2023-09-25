@@ -2,7 +2,7 @@ import struct
 from request_header import RequestHeader
 from request_file_payload import RequestFilePayload
 from request_public_key_payload import RequestPublicKeyPayload
-from request_send_file_payload import RequestSendFilePayload
+from server.request_sent_file_payload import RequestSentFilePayload
 from request_user_payload import RequestUserPayload
 from message import Message
 
@@ -42,7 +42,7 @@ class DataParser:
       case 1028:
         content_size, file_name, = struct.unpack(PROTOCOL_PAYLOAD_1028_FORMAT, payload_data[:PAYLOAD_1028_SIZE])
         message_content = struct.unpack(f'<{(content_size)}s', payload_data[PAYLOAD_1028_SIZE:PAYLOAD_1028_SIZE + content_size])[0]
-        self.payload = RequestSendFilePayload(content_size, file_name.rstrip(b'\x00'), message_content)
+        self.payload = RequestSentFilePayload(content_size, file_name.rstrip(b'\x00'), message_content)
       case 1029 | 1030 | 1031:
         file_name = struct.unpack(PROTOCOL_PAYLOAD_1029_FORMAT, payload_data)[0]
         self.payload = RequestFilePayload(file_name.rstrip(b'\x00'))
