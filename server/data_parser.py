@@ -17,6 +17,10 @@ PAYLOAD_1026_SIZE = struct.calcsize(PROTOCOL_PAYLOAD_1026_FORMAT)
 PAYLOAD_1028_SIZE = struct.calcsize(PROTOCOL_PAYLOAD_1028_FORMAT)
 PAYLOAD_1029_SIZE = PAYLOAD_1030_SIZE = PAYLOAD_1031_SIZE = struct.calcsize(PROTOCOL_PAYLOAD_1031_FORMAT)
 
+# TODOS:
+# error handling
+# validations
+
 class DataParser:
   def __init__(self, data):
     self.data = data

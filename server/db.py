@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 class DB:
     def __init__(self, db_name):
@@ -70,4 +71,33 @@ class DB:
           INSERT INTO files (ID, FileName, PathName, Verified)
           VALUES (?, ?, ?, ?)
         ''', file)
+
+    def update_client(self, client):
+      with self.connection as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+          UPDATE clients
+          SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
+          WHERE ID = ?
+        ''', client[1:], client[0])
+
+
+        # cursor.execute('''
+        #   SELECT * FROM clients
+        #   WHERE ID = ?
+        # ''', id)
+
+        # _, name, public_key, _, aes_key = cursor.fetchone()
+        # name = new_name if new_name else name
+        # public_key = new_public_key if new_public_key else public_key
+        # aes_key = new_aes_key if new_aes_key else aes_key
+        # last_seen = datetime.now()
+        
+        # cursor.execute('''
+        #   UPDATE clients
+        #   SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
+        #   WHERE ID = ?
+        # ''', (name, public_key, last_seen, aes_key, id))
+
+
          

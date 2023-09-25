@@ -1,7 +1,13 @@
 from threading import Thread
 from data_parser import DataParser
+from crypt import Crypt
 
 PACKET_SIZE = 1024
+
+# TODOS:
+# error handling
+# validations
+# thread synchronization
 class RequestHandler(Thread):
   def __init__(self, socket, address, clients_manager, files_manager):
     super().__init__()
@@ -30,30 +36,67 @@ class RequestHandler(Thread):
     self.request = data_parser.get_message()
 
   def handle_request(self):
-    match self.message.get_header().get_code():
+    match self.request.get_header().get_code():
       case 1025:
-        self.handler_register()
+        self.handle_register()
       case 1026:
-        pass
+        self.handle_public_key()
       case 1027:
-        pass
+        self.handle_relogin()
       case 1028:
-        pass
+        self.handle_sent_file()
       case 1029:
         pass
       case 1030:
         pass
       case 1031:
-        pass
-
+        pass                                          
 
   def handle_register(self):
-    name = self.message.get_payload().get_name()
+    name = self.request.get_payload().get_name()
     client = self.clients_manager.get_client_by_name(name)
 
     if client:
-      pass # error already exists
+      pass # send response 2101
 
     self.clients_manager.register_client(name)
 
-    # send success
+    # send response 2100
+
+  def handle_public_key(self):
+    name = self.request.get_payload().get_name()
+    public_key = self.request.get_payload.get_public_key()
+    self.clients_manager.save_public_key(name, public_key)
+
+    crypt = Crypt(public_key)
+    encrypted_aes_key = crypt.get_encrypted_aes_key()
+    self.clients_manager.save_encrypted_aes_key(name, encrypted_aes_key)
+
+    # send response 2102 
+
+  def handle_relogin(self):
+    name = self.request.get_payload().get_name()
+    client = self.clients_manager.get_client_by_name(name)
+           
+    if not client:
+      pass # send respone 2106
+    
+    _, _, public_key, _, _ = client
+
+    if not public_key:
+      pass # send response 2106
+     
+    crypt = Crypt(public_key)
+    encrypted_aes_key = crypt.get_encrypted_aes_key()
+    self.clients_manager.save_encrypted_aes_key(name, encrypted_aes_key)
+ 
+    # send response 2105
+
+  def handle_sent_file(self):
+    _, _, public_key, _, aes_key = self.request.get_header().get_client_id()
+    key_crypt = Crypt(public_key)
+    decrypted_aes_key = key_crypt.decrypt_aes_key(aes_key)
+    file_crypt = Crypt(decrypted_aes_key)
+    decrypted_file = file_crypt.get_decrypted_message_content(self.request.get_payload().get_message_content())
+
+    
