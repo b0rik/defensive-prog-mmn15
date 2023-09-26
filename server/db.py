@@ -1,6 +1,10 @@
 import sqlite3
 from datetime import datetime
 
+# TODOS
+# error handling
+# valiidations
+# thread synchronization
 class DB:
     def __init__(self, db_name):
       self.connection = sqlite3.connect(
@@ -72,11 +76,17 @@ class DB:
     
     def insert_file(self, file):
       with self.connection as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-          INSERT INTO files (ID, FileName, PathName, Verified)
-          VALUES (?, ?, ?, ?)
-        ''', file)
+        try:
+          cursor = conn.cursor()
+          cursor.execute('''
+            INSERT INTO files (ID, FileName, PathName, Verified)
+            VALUES (?, ?, ?, ?)
+          ''', file)
+        except Exception as e:
+          print(f'Error: {e} on client {file[0]}')
+          return False
+      
+      return True
 
     def update_client(self, client):
       id, name, public_key, last_seen, aes_key = client
@@ -97,10 +107,16 @@ class DB:
     def update_file(self, file):
       client_id, file_name, path_name, verified = file
       with self.connection as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-          UPDATE files
-          SET PathName = ?, Verified = ?
-          WHERE ID = ? AND FileName = ?
-        ''', path_name, verified, client_id, file_name)
+        try:
+          cursor = conn.cursor()
+          cursor.execute('''
+            UPDATE files
+            SET PathName = ?, Verified = ?
+            WHERE ID = ? AND FileName = ?
+          ''', path_name, verified, client_id, file_name)
+        except Exception as e:
+          print(f'Error: {e} on client {file[0]}')
+          return False
+        
+      return True
 

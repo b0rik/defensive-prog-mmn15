@@ -14,7 +14,7 @@ class FilesManager:
     file_record = (client_id, file_name, path_name, False)
     self.files.append(file_record)
     self.files_content.update({ (client_id, file_name): file_content })
-    self.db.insert_file(file_record)
+    return self.db.insert_file(file_record)
   
   def get_file_by_client_id_and_file_name(self, id, name):
     file = list(filter(lambda client_id, file_name, path_name, verified: client_id == id and file_name == name, self.files))
@@ -29,4 +29,4 @@ class FilesManager:
     updated_file = (id, name, path, True)
 
     self.files = list(map(lambda file: file if file[0] != id else updated_file, self.files))
-    self.db.update_file(updated_file)
+    return self.db.update_file(updated_file)

@@ -9,6 +9,7 @@ FILES_PATH = '/files'
 # error handling
 # validations
 # thread synchronization
+# get return status from handlers and close socket if needed
 class RequestHandler(Thread):
   def __init__(self, socket, address, clients_manager, files_manager):
     super().__init__()
@@ -16,6 +17,7 @@ class RequestHandler(Thread):
     self.address = address
     self.clients_manager = clients_manager
     self.files_manager = files_manager
+    self.op_provider = OP()
 
   def run(self):
     pass
@@ -36,11 +38,14 @@ class RequestHandler(Thread):
       self.data += buffer
     
   def parse_data(self):
-    data_parser = DataParser(self.data)
+    data_parser = DataParser(self.data, self.op_provider)
     data_parser.parse_data()
     self.request = data_parser.get_message()
 
   def handle_request(self):
+    request_handler = self.op_provider.get_request_handler()
+    request_handler.handle(self.request)
+
     match self.request.get_header().get_code():
       case 1025:
         self.handle_register()
