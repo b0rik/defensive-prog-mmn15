@@ -4,9 +4,12 @@ from relogin_handler import ReloginHandler
 from sent_file_handler import SentFileHandler
 from public_key_handler import PublicKeyHandler
 
+import op
+
 class HandlerProvider:
   def __init__(self, code):
     self.code = code
+    self.handler = op.OPS.get(self.code).get('handler')
   
   def get_request_handler(self):
-    pass
+    return self.handler
