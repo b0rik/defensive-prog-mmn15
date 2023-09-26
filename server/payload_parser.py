@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class ParserInterface(ABC):
+class PayloadParser(ABC):
   @abstractmethod
   def parse(self, data):
     pass
