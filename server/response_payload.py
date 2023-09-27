@@ -1,3 +1,5 @@
+from sys import getsizeof
+
 class ResponsePayload:
   def __init__(self, client_id):
     self.client_id = client_id
@@ -5,6 +7,10 @@ class ResponsePayload:
   def get_client_id(self):
     return self.client_id
   
+  def get_size(self):
+    attributes = [attr for attr in dir(self) if not attr.startswith('__') and not callable(getattr(self, attr))]
+    total_size = sum(getsizeof(getattr(self, attr)) for attr in attributes)
+    return total_size
 class ResponseKeyPayload(ResponsePayload):
   def __init__(self, client_id, encrypted_key):
     super().__init__(client_id)

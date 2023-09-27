@@ -1,8 +1,8 @@
 class ResponseHeader:
-  def __init__(self, version, code, paylad_size):
+  def __init__(self, version, code, payload_size):
     self.version = version
     self.code = code
-    self.paylad_size = paylad_size
+    self.paylad_size = payload_size
 
   def get_version(self):
     return self.version

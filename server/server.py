@@ -14,4 +14,7 @@ class Server:
 
     while True:
       client_socket, client_address = self.socket.accept()
-      RequestHandler(client_socket, client_address).start()
+      request_handler_thread = RequestHandler(client_socket, client_address).start()
+      request_handler_thread.start()
+      request_handler_thread.join()
+      client_socket.close()
