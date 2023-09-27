@@ -17,7 +17,7 @@ class FilesManager:
     return self.db.insert_file(file_record)
   
   def get_file_by_client_id_and_file_name(self, id, name):
-    file = list(filter(lambda client_id, file_name, path_name, verified: client_id == id and file_name == name, self.files))
+    file = list(filter(lambda file_row: file_row[0] == id and file_row[1] == name, self.files))
 
     return file[0] if file else None
   

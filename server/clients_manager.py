@@ -13,12 +13,12 @@ class ClientsManager:
     self.clients = self.db.get_clients()
 
   def get_client_by_name(self, name):
-    client = list(filter(lambda id, client_name, public_key, last_seen, aes_key: client_name == name, self.clients))
+    client = list(filter(lambda client_row: client_row[1] == name, self.clients))
 
     return client[0] if client else None
 
   def get_client_by_id(self, id):
-    client = list(filter(lambda client_id, name, public_key, last_seen, aes_key: client_id == id, self.clients))
+    client = list(filter(lambda client_row: client_row[0] == id, self.clients))
 
     return client[0] if client else None
 
