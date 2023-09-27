@@ -6,6 +6,7 @@ from datetime import datetime
 # thread synchronization
 # validations
 # Client class
+
 class ClientsManager:
   def __init__(self, db):
     self.db = db

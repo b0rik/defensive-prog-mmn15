@@ -1,9 +1,3 @@
-from crc_ok_handler import CRCOkHandler
-from register_handler import RegisterHandler
-from relogin_handler import ReloginHandler
-from sent_file_handler import SentFileHandler
-from public_key_handler import PublicKeyHandler
-
 import op
 
 class HandlerProvider:

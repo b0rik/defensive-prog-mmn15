@@ -46,19 +46,29 @@ class DB:
 
     def get_clients(self):
       with self.connection as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-          SELECT * FROM clients
-        ''')
-        return cursor.fetchall()
+        try:
+          cursor = conn.cursor()
+          cursor.execute('''
+            SELECT * FROM clients
+          ''')
+          return cursor.fetchall()
+        except Exception as e:
+          print(f'Error {e} getting clients')
+      
+      return None
 
     def get_files(self):
       with self.connection as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-          SELECT * FROM files
-        ''')
-        return cursor.fetchall()
+        try:
+          cursor = conn.cursor()
+          cursor.execute('''
+            SELECT * FROM files
+          ''')
+          return cursor.fetchall()
+        except Exception as e:
+          print(f'Error {e} getting files')
+
+      return None
     
     def insert_client(self, client):
       with self.connection as conn:
