@@ -1,4 +1,5 @@
 import payload_parser
+import payload_serializer
 import handler
 
 OPS = {
@@ -29,6 +30,30 @@ OPS = {
   1031: {
     'parser': payload_parser.FilePayloadParser,
     'handler': handler.CRCFailAbortHandler
-  }
+  },
+  2100: {
+    'serializer': payload_serializer.ClientPayloadSerializer
+  },
+  2101: {
+    'serializer': payload_serializer.EmptyPayloadSerializer
+  },
+  2102: {
+    'serializer': payload_serializer.KeyPayloadSerializer
+  },
+  2103: {
+    'serializer': payload_serializer.ReceiveFilePayloadSerializer
+  },
+  2104: {
+    'serializer': payload_serializer.ClientPayloadSerializer
+  },
+  2105: {
+    'serializer': payload_serializer.KeyPayloadSerializer
+  },
+  2106: {
+    'serializer': payload_serializer.ClientPayloadSerializer
+  },
+  2107: {
+    'serializer': payload_serializer.EmptyPayloadSerializer
+  },
 }
   

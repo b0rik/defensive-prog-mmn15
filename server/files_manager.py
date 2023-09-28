@@ -1,3 +1,5 @@
+from file import File
+
 # TODOS:
 # File class
 # handle errors
@@ -11,13 +13,13 @@ class FilesManager:
     self.files_content = {}
 
   def add_file(self, client_id, file_name, path_name, file_content):
-    file_record = (client_id, file_name, path_name, False)
-    self.files.append(file_record)
+    file = File(client_id, file_name, path_name, False)
+    self.files.append(file)
     self.files_content.update({ (client_id, file_name): file_content })
-    return self.db.insert_file(file_record)
+    return self.db.insert_file(file)
   
   def get_file_by_client_id_and_file_name(self, id, name):
-    file = list(filter(lambda file_row: file_row[0] == id and file_row[1] == name, self.files))
+    file = list(filter(lambda f: f.get_id() == id and f.get_file_name() == name, self.files))
 
     return file[0] if file else None
   
@@ -25,8 +27,8 @@ class FilesManager:
     return self.files_content.get((id, name))
   
   def set_crc_ok(self, client_id, file_name):
-    id, name, path, _ = self.get_file_by_client_id_and_file_name(client_id, file_name)
-    updated_file = (id, name, path, True)
+    file = self.get_file_by_client_id_and_file_name(client_id, file_name)
+    file.set_verified(True)
 
-    self.files = list(map(lambda file: file if file[0] != id else updated_file, self.files))
-    return self.db.update_file(updated_file)
+    self.files = list(map(lambda f: f if f.get_id() != id else file, self.files))
+    return self.db.update_file(file)

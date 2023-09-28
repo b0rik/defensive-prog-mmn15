@@ -1,5 +1,7 @@
 import sqlite3
 from datetime import datetime
+from client import Client
+from file import File
 
 # TODOS
 # error handling
@@ -51,7 +53,9 @@ class DB:
           cursor.execute('''
             SELECT * FROM clients
           ''')
-          return cursor.fetchall()
+          clients_rows = cursor.fetchall()
+          clients = list(map(lambda client_row: Client(*client_row) , clients_rows))
+          return clients
         except Exception as e:
           print(f'Error {e} getting clients')
       
@@ -64,7 +68,9 @@ class DB:
           cursor.execute('''
             SELECT * FROM files
           ''')
-          return cursor.fetchall()
+          files_rows = cursor.fetchall()
+          files = list(map(lambda file_row: File(*file_row) , files_rows))
+          return files
         except Exception as e:
           print(f'Error {e} getting files')
 
@@ -77,7 +83,7 @@ class DB:
           cursor.execute('''
             INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
             VALUES (?, ?, ?, ?, ?)
-          ''', client)
+          ''', client.get_id(), client.get_name(), client.get_public_key(), client.get_last_seen(), client.get_aes_key())
         except Exception as e:
           print(f'Error: {e} on client {client[0]}:{client[1]}')
           return False
@@ -91,15 +97,14 @@ class DB:
           cursor.execute('''
             INSERT INTO files (ID, FileName, PathName, Verified)
             VALUES (?, ?, ?, ?)
-          ''', file)
+          ''', file.get_id(), file.get_file_name(), file.get_path_name(), file.get_verified())
         except Exception as e:
-          print(f'Error: {e} on client {file[0]}')
+          print(f'Error: {e} on client {file.get_id()}')
           return False
       
       return True
 
     def update_client(self, client):
-      id, name, public_key, last_seen, aes_key = client
       with self.connection as conn:
         try:
           cursor = conn.cursor()
@@ -107,9 +112,9 @@ class DB:
             UPDATE clients
             SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
             WHERE ID = ?
-          ''', name, public_key, last_seen, aes_key, id)
+          ''', client.get_name(), client.get_public_key, client.get_last_seen(), client.get_aes_key(), client.get_id())
         except Exception as e:
-          print(f'Error: {e} on client {id}:{name}')
+          print(f'Error: {e} on client {client.get_id()}:{client.get_name()}')
           return False
         
       return True
@@ -123,9 +128,9 @@ class DB:
             UPDATE files
             SET PathName = ?, Verified = ?
             WHERE ID = ? AND FileName = ?
-          ''', path_name, verified, client_id, file_name)
+          ''', file.get_path_name(), file.get_verified(), file.get_client_id(), file.get_file_name())
         except Exception as e:
-          print(f'Error: {e} on client {file[0]}')
+          print(f'Error: {e} on client {file.get_id()}')
           return False
         
       return True

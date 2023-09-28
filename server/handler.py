@@ -64,16 +64,15 @@ class SentFileHandler(Handler):
   def handle(self, request, **managers):
     client_id = request.get_header().get_client_id()
     client = managers.get('clients_manager').get_client_by_id(client_id)
-    _, name, public_key, _, aes_key = client
 
     try:
-      key_crypt = Crypt(public_key)
-      decrypted_aes_key = key_crypt.decrypt_aes_key(aes_key)
+      key_crypt = Crypt(client.get_public_key())
+      decrypted_aes_key = key_crypt.decrypt_aes_key(client.get_aes_key())
       file_crypt = Crypt(decrypted_aes_key)
       message_content = request.get_payload().get_message_content()
       decrypted_file = file_crypt.get_decrypted_message_content(message_content)
     except Exception as e:
-      print(f'Error {e} on decrypting file for the client {name}')
+      print(f'Error {e} on decrypting file for the client {client.get_name()}')
       # send response 2107
       response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
       response = Message(response_header, None)
@@ -84,7 +83,7 @@ class SentFileHandler(Handler):
 
     succ_add_file = managers.get('files_manager').add_file(client_id, file_name, file_path, decrypted_file)
     if not succ_add_file:
-      print(f'Error saving the file for the client {name}')
+      print(f'Error saving the file for the client {client.get_name()}')
       # send response 2107
       response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
       response = Message(response_header, None)
@@ -121,10 +120,8 @@ class ReloginHandler(Handler):
       response_header = ResponseHeader(request.get_header().get_version(), 2106, response_payload_size)
       response = Message(response_header, response_payload)
       return response
-    
-    _, _, public_key, _, _ = client
 
-    if not public_key:
+    if not client.get_public_key():
       # send response 2106
       respose_payload = response_payload.ResponsePayload(client_id)
       response_payload_size = respose_payload.get_size()
@@ -133,7 +130,7 @@ class ReloginHandler(Handler):
       return response
      
     try:
-      crypt = Crypt(public_key)
+      crypt = Crypt(client.get_public_key())
       encrypted_aes_key = crypt.get_encrypted_aes_key()
       managers.get('clients_manager').save_encrypted_aes_key(name, encrypted_aes_key)
     except Exception as e:
