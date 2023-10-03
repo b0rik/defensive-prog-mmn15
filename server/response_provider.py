@@ -10,7 +10,7 @@ class ResponseProvider():
       case 2104 | 2106 | 2100:
         payload = response_payload.ResponsePayload(request.get_header().get_client_id())
       case 2107 | 2101:
-        payload = response_payload.ResponseEmptyPayload(request.get_header().get_client_id())
+        payload = response_payload.ResponseEmptyPayload()
       case 2103:
         payload = response_payload.ResponseReceiveFilePayload(
           request.get_header().get_client_id(),

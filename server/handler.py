@@ -5,7 +5,6 @@ from response_provider import ResponseProvider
 # TODOS
 # error handling
 # validations
-# server version
 
 FILES_PATH = '/files'
 class Handler(ABC):
