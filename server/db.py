@@ -5,7 +5,8 @@ from file import File
 
 # TODOS
 # error handling
-# valiidations
+# validations
+# SQL validations
 # thread synchronization
 class DB:
     def __init__(self, db_name):
@@ -48,90 +49,56 @@ class DB:
 
     def get_clients(self):
       with self.connection as conn:
-        try:
-          cursor = conn.cursor()
-          cursor.execute('''
-            SELECT * FROM clients
-          ''')
-          clients_rows = cursor.fetchall()
-          clients = list(map(lambda client_row: Client(*client_row) , clients_rows))
-          return clients
-        except Exception as e:
-          print(f'Error {e} getting clients')
-      
-      return None
+        cursor = conn.cursor()
+        cursor.execute('''
+          SELECT * FROM clients
+        ''')
+        clients_rows = cursor.fetchall()
+        clients = list(map(lambda client_row: Client(*client_row) , clients_rows))
+        return clients
 
     def get_files(self):
       with self.connection as conn:
-        try:
-          cursor = conn.cursor()
-          cursor.execute('''
-            SELECT * FROM files
-          ''')
-          files_rows = cursor.fetchall()
-          files = list(map(lambda file_row: File(*file_row) , files_rows))
-          return files
-        except Exception as e:
-          print(f'Error {e} getting files')
-
-      return None
+        cursor = conn.cursor()
+        cursor.execute('''
+          SELECT * FROM files
+        ''')
+        files_rows = cursor.fetchall()
+        files = list(map(lambda file_row: File(*file_row) , files_rows))
+        return files
     
     def insert_client(self, client):
       with self.connection as conn:
-        try:
-          cursor = conn.cursor()
-          cursor.execute('''
-            INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
-            VALUES (?, ?, ?, ?, ?)
-          ''', client.get_id(), client.get_name(), client.get_public_key(), client.get_last_seen(), client.get_aes_key())
-        except Exception as e:
-          print(f'Error: {e} on client {client[0]}:{client[1]}')
-          return False
-      
-      return True
+        cursor = conn.cursor()
+        cursor.execute('''
+          INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
+          VALUES (?, ?, ?, ?, ?)
+        ''', client.get_id(), client.get_name(), client.get_public_key(), client.get_last_seen(), client.get_aes_key())
     
     def insert_file(self, file):
       with self.connection as conn:
-        try:
-          cursor = conn.cursor()
-          cursor.execute('''
-            INSERT INTO files (ID, FileName, PathName, Verified)
-            VALUES (?, ?, ?, ?)
-          ''', file.get_id(), file.get_file_name(), file.get_path_name(), file.get_verified())
-        except Exception as e:
-          print(f'Error: {e} on client {file.get_id()}')
-          return False
-      
-      return True
+        cursor = conn.cursor()
+        cursor.execute('''
+          INSERT INTO files (ID, FileName, PathName, Verified)
+          VALUES (?, ?, ?, ?)
+        ''', file.get_id(), file.get_file_name(), file.get_path_name(), file.get_verified())
 
     def update_client(self, client):
       with self.connection as conn:
-        try:
-          cursor = conn.cursor()
-          cursor.execute('''
-            UPDATE clients
-            SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
-            WHERE ID = ?
-          ''', client.get_name(), client.get_public_key, client.get_last_seen(), client.get_aes_key(), client.get_id())
-        except Exception as e:
-          print(f'Error: {e} on client {client.get_id()}:{client.get_name()}')
-          return False
-        
-      return True
+        cursor = conn.cursor()
+        cursor.execute('''
+          UPDATE clients
+          SET Name = ?, PublicKey = ?, LastSeen = ?, AESKey = ?
+          WHERE ID = ?
+        ''', client.get_name(), client.get_public_key, client.get_last_seen(), client.get_aes_key(), client.get_id())
 
     def update_file(self, file):
       client_id, file_name, path_name, verified = file
       with self.connection as conn:
-        try:
-          cursor = conn.cursor()
-          cursor.execute('''
-            UPDATE files
-            SET PathName = ?, Verified = ?
-            WHERE ID = ? AND FileName = ?
-          ''', file.get_path_name(), file.get_verified(), file.get_client_id(), file.get_file_name())
-        except Exception as e:
-          print(f'Error: {e} on client {file.get_id()}')
-          return False
-        
-      return True
+        cursor = conn.cursor()
+        cursor.execute('''
+          UPDATE files
+          SET PathName = ?, Verified = ?
+          WHERE ID = ? AND FileName = ?
+        ''', file.get_path_name(), file.get_verified(), file.get_client_id(), file.get_file_name())
 
