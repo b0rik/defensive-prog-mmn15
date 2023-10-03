@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from crypt import Crypt
-from response_header import ResponseHeader
-import response_payload
-from message import Message
+from response_provider import ResponseProvider
 
 # TODOS
 # error handling
@@ -18,11 +16,7 @@ class Handler(ABC):
 class CRCFailAbortHandler(Handler):
   def handle(self, request, **managers):
     # send response 2104
-    respose_payload = response_payload.ResponsePayload(request.get_header().get_client_id())
-    response_payload_size = respose_payload.get_size()
-    response_header = ResponseHeader(request.get_header().get_version(), 2104, response_payload_size)
-    response = Message(response_header, response_payload)
-    return response
+    return ResponseProvider.make_response(request, 2104)
 
 class CRCFailHandler(Handler):
   def handle(self, request, **managers):
@@ -37,29 +31,14 @@ class CRCOkHandler(Handler):
 
     try:
       managers.get('files_manager').set_crc_ok(client_id, file_name)
-    except:
-      print(f'Error setting crc for file {file_name} from client {client_id}')
-      # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
-
-    try:
       with open(file_path, 'wb') as file:
         file.write(file_content)
     except Exception as e:
-      print(f'Error writing file {file_name} from client {client_id}')
       # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
+      return ResponseProvider.make_response(request, 2107)
 
     # send response 2104
-    respose_payload = response_payload.ResponsePayload(client_id)
-    response_payload_size = respose_payload.get_size()
-    response_header = ResponseHeader(request.get_header().get_version(), 2104, response_payload_size)
-    response = Message(response_header, response_payload)
-    return response
+    return ResponseProvider.make_response(request, 2104)
 
 class SentFileHandler(Handler):
   def handle(self, request, **managers):
@@ -72,113 +51,56 @@ class SentFileHandler(Handler):
       file_crypt = Crypt(decrypted_aes_key)
       message_content = request.get_payload().get_message_content()
       decrypted_file = file_crypt.get_decrypted_message_content(message_content)
-    except Exception as e:
-      print(f'Error {e} on decrypting file for the client {client.get_name()}')
-      # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
 
-    file_name = request.get_payload().get_file_name()
-    file_path = f'{FILES_PATH}/{client_id}/{file_name}'
+      file_name = request.get_payload().get_file_name()
+      file_path = f'{FILES_PATH}/{client_id}/{file_name}'
 
-    try:
       managers.get('files_manager').add_file(client_id, file_name, file_path, decrypted_file)
     except:
-      print(f'Error saving the file for the client {client.get_name()}')
       # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
+      return ResponseProvider.make_response(request, 2107)
 
     # calculate checksum
     checksum = None
     # send response 2103
-    response_payload = response_payload.ResponseReceiveFilePayload(
-      client_id,
-      request.get_payload().get_content_size(), 
-      file_name, 
-      checksum
-    )
-    payload_size = response_payload.get_size()
-    response_header = ResponseHeader(
-      request.get_header().get_version(),
-      2103,
-      payload_size
-    )
-    response = Message(response_header, response_payload)
-    return response
+    return ResponseProvider.make_response(request, 2103, checksum=checksum)
 
 class ReloginHandler(Handler):
   def handle(self, request, **managers):
     name = request.get_payload().get_name()
     client = managers.get('clients_manager').get_client_by_name(name)
-    client_id = request.get_header().get_client_id()
            
-    if not client:
+    if not client or not client.get_public_key():
       # send respone 2106
-      respose_payload = response_payload.ResponsePayload(client_id)
-      response_payload_size = respose_payload.get_size()
-      response_header = ResponseHeader(request.get_header().get_version(), 2106, response_payload_size)
-      response = Message(response_header, response_payload)
-      return response
-
-    if not client.get_public_key():
-      # send response 2106
-      respose_payload = response_payload.ResponsePayload(client_id)
-      response_payload_size = respose_payload.get_size()
-      response_header = ResponseHeader(request.get_header().get_version(), 2106, response_payload_size)
-      response = Message(response_header, response_payload)
-      return response
-     
+      return ResponseProvider.make_response(request, 2106)
+    
     try:
       crypt = Crypt(client.get_public_key())
       encrypted_aes_key = crypt.get_encrypted_aes_key()
       managers.get('clients_manager').save_encrypted_aes_key(name, encrypted_aes_key)
     except Exception as e:
-      print(f'Error {e} on handling relogin for the client {name}')
       # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
+      return ResponseProvider.make_response(request, 2107)
  
     # send response 2105
-    respose_payload = response_payload.ResponseKeyPayload(
-      client_id,
-      encrypted_aes_key
-    )
-    response_payload_size = respose_payload.get_size()
-    response_header = ResponseHeader(request.get_header().get_version(), 2105, response_payload_size)
-    response = Message(response_header, response_payload)
-    return response
+    return ResponseProvider.make_response(request, 2105, encrypted_aes_key=encrypted_aes_key)
 
 class RegisterHandler(Handler):
   def handle(self, request, **managers):
     name = request.get_payload().get_name()
     client = managers.get('clients_manager').get_client_by_name(name)
 
-    if client:
-      print(f'The name {name} is already registered.')
-      # send response 2101
-      response_header = ResponseHeader(request.get_header().get_version(), 2101, 0)
-      response = Message(response_header, None)
-      return response
-
     try:
+      if client:
+        raise Exception('Client already exists')
+
       managers.get('clients_manager').register_client(name)
     except:
-      print(f'Error registering the client {name}')
       # send response 2101
-      response_header = ResponseHeader(request.get_header().get_version(), 2101, 0)
-      response = Message(response_header, None)
-      return response
+      return ResponseProvider.make_response(request, 2101)
 
     # send response 2100
-    respose_payload = response_payload.ResponsePayload(request.get_header().get_client_id())
-    response_payload_size = respose_payload.get_size()
-    response_header = ResponseHeader(request.get_header().get_version(), 2100, response_payload_size)
-    response = Message(response_header, response_payload)
-    return response
+    return ResponseProvider.make_response(request, 2100)
 
 class PublicKeyHandler(Handler):
   def handle(self, request, **managers):
@@ -187,30 +109,13 @@ class PublicKeyHandler(Handler):
 
     try:
       managers.get('clients_manager').save_public_key(name, public_key)
-    except:
-      print(f'Error saving the public key for the client {name}')
-      # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
 
-    try:
       crypt = Crypt(public_key)
       encrypted_aes_key = crypt.get_encrypted_aes_key()
       managers.get('clients_manager').save_encrypted_aes_key(name, encrypted_aes_key)
     except Exception as e:
-      print(f'Error {e} on handling public key for the client {name}')
       # send response 2107
-      response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
-      response = Message(response_header, None)
-      return response
+      return ResponseProvider.make_response(request, 2107)
     
     # send response 2102 
-    respose_payload = response_payload.ResponseKeyPayload(
-      request.get_header().get_client_id(),
-      encrypted_aes_key
-    )
-    response_payload_size = respose_payload.get_size()
-    response_header = ResponseHeader(request.get_header().get_version(), 2102, response_payload_size)
-    response = Message(response_header, response_payload)
-    return response
+    return ResponseProvider.make_response(request, 2102, encrypted_aes_key=encrypted_aes_key)

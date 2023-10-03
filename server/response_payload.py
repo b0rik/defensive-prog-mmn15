@@ -11,6 +11,10 @@ class ResponsePayload:
     attributes = [attr for attr in dir(self) if not attr.startswith('__') and not callable(getattr(self, attr))]
     total_size = sum(getsizeof(getattr(self, attr)) for attr in attributes)
     return total_size
+  
+class ResponseEmptyPayload(ResponsePayload):
+  def get_size(self):
+    return 0
 class ResponseKeyPayload(ResponsePayload):
   def __init__(self, client_id, encrypted_key):
     super().__init__(client_id)
