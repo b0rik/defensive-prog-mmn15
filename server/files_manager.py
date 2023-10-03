@@ -1,7 +1,6 @@
 from file import File
 
 # TODOS:
-# File class
 # handle errors
 # validations
 # duplicate files
@@ -16,7 +15,7 @@ class FilesManager:
     file = File(client_id, file_name, path_name, False)
     self.files.append(file)
     self.files_content.update({ (client_id, file_name): file_content })
-    return self.db.insert_file(file)
+    self.db.insert_file(file)
   
   def get_file_by_client_id_and_file_name(self, id, name):
     file = list(filter(lambda f: f.get_id() == id and f.get_file_name() == name, self.files))
@@ -31,4 +30,4 @@ class FilesManager:
     file.set_verified(True)
 
     self.files = list(map(lambda f: f if f.get_id() != id else file, self.files))
-    return self.db.update_file(file)
+    self.db.update_file(file)

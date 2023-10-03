@@ -6,7 +6,6 @@ from client import Client
 # error handling
 # thread synchronization
 # validations
-# Client class
 
 class ClientsManager:
   def __init__(self, db):
@@ -29,7 +28,7 @@ class ClientsManager:
     client = Client(id, name, None, last_seen, None)
     
     self.clients.append(client)
-    return self.db.insert_client(client)
+    self.db.insert_client(client)
 
   def save_public_key(self, name, key):
     client = self.get_client_by_name(name)
@@ -37,7 +36,7 @@ class ClientsManager:
     client.set_last_seen(datetime.now())
 
     self.clients = list(map(lambda c: c if c.get_id() != client.get_id() else client, self.clients))
-    return self.db.update_client(client)
+    self.db.update_client(client)
 
   def save_encrypted_aes_key(self, name, key):
     client = self.get_client_by_name(name)
@@ -46,5 +45,4 @@ class ClientsManager:
 
     self.clients = list(map(lambda c: c if c.get_id() != id else client, self.clients))
     self.db.update_client(client)
-    
-
+  

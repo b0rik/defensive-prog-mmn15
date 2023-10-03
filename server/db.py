@@ -4,9 +4,7 @@ from client import Client
 from file import File
 
 # TODOS
-# error handling
 # validations
-# SQL validations
 # thread synchronization
 class DB:
     def __init__(self, db_name):
@@ -27,9 +25,9 @@ class DB:
         cursor.execute('''
           CREATE TABLE IF NOT EXISTS clients (
             ID VARCHAR(16) PRIMARY KEY,
-            Name VARCHAR(255),
+            Name VARCHAR(255) NOT NULL UNIQUE,
             PublicKey VARCHAR(160),
-            LastSeen TIMESTAMP,
+            LastSeen TIMESTAMP NOT NULL,
             AESKey VARCHAR(16)
           )
         ''')

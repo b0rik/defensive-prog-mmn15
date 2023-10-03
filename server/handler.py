@@ -35,8 +35,9 @@ class CRCOkHandler(Handler):
     file_content = managers.get('files_manager').get_file_content_by_client_id_and_file_name(client_id, file_name)
     file_path = f'{FILES_PATH}/{client_id}/{file_name}'
 
-    is_succ_set_crc = managers.get('files_manager').set_crc_ok(client_id, file_name)
-    if not is_succ_set_crc:
+    try:
+      managers.get('files_manager').set_crc_ok(client_id, file_name)
+    except:
       print(f'Error setting crc for file {file_name} from client {client_id}')
       # send response 2107
       response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
@@ -81,8 +82,9 @@ class SentFileHandler(Handler):
     file_name = request.get_payload().get_file_name()
     file_path = f'{FILES_PATH}/{client_id}/{file_name}'
 
-    succ_add_file = managers.get('files_manager').add_file(client_id, file_name, file_path, decrypted_file)
-    if not succ_add_file:
+    try:
+      managers.get('files_manager').add_file(client_id, file_name, file_path, decrypted_file)
+    except:
       print(f'Error saving the file for the client {client.get_name()}')
       # send response 2107
       response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
@@ -157,10 +159,14 @@ class RegisterHandler(Handler):
 
     if client:
       print(f'The name {name} is already registered.')
-      pass # send response 2101
+      # send response 2101
+      response_header = ResponseHeader(request.get_header().get_version(), 2101, 0)
+      response = Message(response_header, None)
+      return response
 
-    succ_register = managers.get('clients_manager').register_client(name)
-    if not succ_register:
+    try:
+      managers.get('clients_manager').register_client(name)
+    except:
       print(f'Error registering the client {name}')
       # send response 2101
       response_header = ResponseHeader(request.get_header().get_version(), 2101, 0)
@@ -178,9 +184,10 @@ class PublicKeyHandler(Handler):
   def handle(self, request, **managers):
     name = request.get_payload().get_name()
     public_key = request.get_payload.get_public_key()
-    succ_save = managers.get('clients_manager').save_public_key(name, public_key)
 
-    if not succ_save:
+    try:
+      managers.get('clients_manager').save_public_key(name, public_key)
+    except:
       print(f'Error saving the public key for the client {name}')
       # send response 2107
       response_header = ResponseHeader(request.get_header().get_version(), 2107, 0)
