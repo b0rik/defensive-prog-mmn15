@@ -1,3 +1,12 @@
+from datetime import datetime
+
+def validate_client(func):
+  def wrapper(self, id, name, public_key, last_seen, aes_key):
+    if not isinstance(last_seen, datetime):
+      raise Exception('last_seen must be a datetime')
+    return func(self, id, name, public_key, last_seen, aes_key)
+  return wrapper
+
 class Client:
   def __init__(self, id, name, public_key, last_seen, aes_key):
     self.id = id
