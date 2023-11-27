@@ -1,5 +1,5 @@
 #include <cstring>
-#include "response_payload.h"
+#include "payload.h"
 
 ResponseEmptyPayload::ResponseEmptyPayload() : size(0) {}
 
@@ -42,3 +42,41 @@ uint32_t ResponseReceiveFilePayload::get_cksum() {
   return cksum;
 }
 
+RequestUserPayload::RequestUserPayload(std::string name) {
+  strncpy(this->name, name.c_str(), 255);
+}
+
+std::string RequestUserPayload::get_name() {
+  return std::string(this->name);
+}
+
+RequestFilePayload::RequestFilePayload(std::string file_name) {
+  strncpy(this->file_name, file_name.c_str(), 255);
+}
+
+std::string RequestFilePayload::get_file_name() {
+  return std::string(this->file_name);
+}
+
+RequestPublicKeyPayload::RequestPublicKeyPayload(std::string name, std::string public_key) 
+  : RequestUserPayload(name) {
+    strncpy(this->public_key, public_key.c_str(), 160);
+}
+
+std::string RequestPublicKeyPayload::get_public_key() {
+  return std::string(this->public_key);
+}
+
+
+RequestSentFilePayload::RequestSentFilePayload(std::string file_name, uint32_t content_size, std::string message_content)
+  : RequestFilePayload(file_name)
+  , content_size(content_size)
+  , message_content(message_content) {}
+
+uint32_t RequestSentFilePayload::get_content_size() {
+  return this->content_size;
+}
+
+std::string RequestSentFilePayload::get_message_content() {
+  return this->message_content;
+}
