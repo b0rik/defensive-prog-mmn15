@@ -2,6 +2,9 @@
 #define SETTINGS_H_
 
 #include <string>
+#include <cstdint>
+
+const uint8_t VERSION = 1;
 
 class Settings {
 public:
@@ -18,6 +21,8 @@ public:
   void set_name(std::string name);
   void set_id(std::string id);
   void set_key(std::string key);
+
+  bool id_exists();
 
 private:
   std::string info_file;

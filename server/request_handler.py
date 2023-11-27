@@ -48,7 +48,7 @@ class RequestHandler(Thread):
   def handle_request(self):
     if self.request:
       request_code = self.request.get_header().get_code()
-      request_handler = HandlerProvider(request_code).get_request_handler()
+      request_handler = HandlerProvider.get_request_handler(request_code)
       self.response = request_handler.handle(self.request, clients_manager=self.clients_manager, files_manager=self.files_manager)
     else:
       self.response = ResponseProvider.make_response(None, 2107)

@@ -136,3 +136,7 @@ void Settings::set_id(std::string id) {
 void Settings::set_key(std::string key) {
   this->key = key;
 }
+
+bool Settings::id_exists() {
+  return !this->id.empty();
+}
