@@ -1,4 +1,4 @@
-from response_header import ResponseHeader
+from header import ResponseHeader
 import response_payload
 from message import Message
 

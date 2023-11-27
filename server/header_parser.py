@@ -1,5 +1,5 @@
 import struct
-from request_header import RequestHeader
+from header import RequestHeader
 
 PROTOCOL_HEADER_FORMAT = '< 16s B H I'
 HEADER_SIZE = struct.calcsize(PROTOCOL_HEADER_FORMAT)
