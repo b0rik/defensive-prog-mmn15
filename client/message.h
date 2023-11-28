@@ -1,19 +1,18 @@
 #ifndef MESSAGE_H_
 #define MESSAGE_H_
 
-#include "response_header.h"
-#include "response_payload.h"
+#include "header.h"
+#include "payload.h"
 
 class Message {
 public:
-  Message(Header& header, Payload& payload);
-  ~Message();
-  Header* get_header();
-  Payload* get_payload();
+  Message(const Header& header, const Payload& payload);
+  const Header& get_header();
+  const Payload& get_payload();
 
 private:
-  Header& header;
-  Payload& payload;
+  const Header& header;
+  const Payload& payload;
 };
 
 #endif // MESSAGE_H_

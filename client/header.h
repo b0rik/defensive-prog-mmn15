@@ -6,25 +6,25 @@
 
 class Header {
 public:
-  Header(uint8_t version, uint16_t code, uint32_t payload_size);
+  Header(const uint8_t& version, const uint16_t& code, const uint32_t& payload_size);
   uint8_t get_version();
   uint16_t get_code();
   uint32_t get_payload_size();
   
 private:
-  uint8_t version;
-  uint16_t code;
-  uint32_t payload_size;
+  const uint8_t version;
+  const uint16_t code;
+  const uint32_t payload_size;
 };
 
 class ResponseHeader : public Header {
 public:
-  ResponseHeader(uint8_t version, uint16_t code, uint32_t payload_size);
+  ResponseHeader(const uint8_t& version, const uint16_t& code, const uint32_t& payload_size);
 };
 
 class RequestHeader : public Header {
 public:
-  RequestHeader(std::string client_id, uint8_t version, uint16_t code, uint32_t payload_size);
+  RequestHeader(const std::string& client_id, const uint8_t& version, const uint16_t& code, const uint32_t& payload_size);
 
 private:
   char client_id[16];
