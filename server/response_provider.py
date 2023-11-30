@@ -26,5 +26,7 @@ class ResponseProvider():
       
     payload_size = payload.get_size()
     header = ResponseHeader(SERVER_VERSION, code, payload_size)
-    response = Message(header, payload)
+    response = Message()
+    response.set_header(header)
+    response.set_payload(payload)
     return response

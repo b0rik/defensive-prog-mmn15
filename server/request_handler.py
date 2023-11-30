@@ -2,6 +2,11 @@ from threading import Thread
 from handler_provider import HandlerProvider
 from response_provider import ResponseProvider
 
+
+from message import Message
+from request_parser import RequestParser 
+from header_parser import HEADER_SIZE
+
 PACKET_SIZE = 1024
 
 # TODOS:
@@ -17,30 +22,39 @@ class RequestHandler(Thread):
     self.files_manager = files_manager
     self.request_parser = request_parser
     self.response_serializer = response_serializer
+    self.request = Message()
 
   def run(self):
-    print(f'Handling request from: {self.address}')
-    self.receive_request()
-    self.parse_request()
+    print(f'Proccessing request from: {self.address}')
+    self.receive_data(HEADER_SIZE)
+    self.parse_header()
+    payload_size = self.request.get_header().get_payload_size()
+    self.receive_data(payload_size)
+    self.parse_payload()
     self.handle_request()
     self.serialize_response()
     self.send_response()
 
-  def receive_request(self): # refactor to receive fixed header size and then dynamic payload
-    print(f'receiving request data from: {self.address}')
+  def receive_data(self, num_of_bytes): 
+    print(f'receiving {num_of_bytes} bytes of data from: {self.address}')
+
     self.data = b''
     
-    while True:
-      try:
-        buffer = self.socket.recv(PACKET_SIZE)
-      except Exception as e:
-        self.data = None
-      
-      if self.data is None or not buffer: 
-        break
+    try:
+      self.data = self.socket.recv(num_of_bytes)
+    except Exception as e:
+      self.data = None
 
-      self.data += buffer
-    
+  def parse_header(self):
+    print(f'Parsing header from: {self.address}')
+    header = self.request_parser.parse_header(self.data)
+    self.request.set_header(header)
+
+  def parse_payload(self):
+    print(f'Parsing payload from: {self.address}')
+    payload = self.request_parser.parse_payload(self.data)
+    self.request.set_payload(payload)
+
   def parse_request(self):
     print(f'parsing request data from: {self.address}')
     if self.data:
