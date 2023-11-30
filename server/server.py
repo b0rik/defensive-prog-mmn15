@@ -20,6 +20,7 @@ class Server:
     
     while True:
       client_socket, client_address = self.socket.accept()
+      print(f'Accepted connection from: {client_address}')
       request_handler_thread = RequestHandler(
         client_socket,
         client_address,

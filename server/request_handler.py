@@ -19,13 +19,15 @@ class RequestHandler(Thread):
     self.response_serializer = response_serializer
 
   def run(self):
+    print(f'Handling request from: {self.address}')
     self.receive_request()
     self.parse_request()
     self.handle_request()
     self.serialize_response()
     self.send_response()
 
-  def receive_request(self):
+  def receive_request(self): # refactor to receive fixed header size and then dynamic payload
+    print(f'receiving request data from: {self.address}')
     self.data = b''
     
     while True:
@@ -38,15 +40,16 @@ class RequestHandler(Thread):
         break
 
       self.data += buffer
-
     
   def parse_request(self):
+    print(f'parsing request data from: {self.address}')
     if self.data:
       self.request = self.request_parser.parse(self.data)
     else:
       self.request = None
 
   def handle_request(self):
+    print(f'Handling request from: {self.address}')
     if self.request:
       request_code = self.request.get_header().get_code()
       request_handler = HandlerProvider.get_request_handler(request_code)
@@ -55,7 +58,13 @@ class RequestHandler(Thread):
       self.response = ResponseProvider.make_response(None, 2107)
 
   def serialize_response(self):
+    print(f'Serializing response to: {self.address}')
     self.serialized_response = self.response_serializer.serialize(self.response)
 
   def send_response(self):
-    self.socket.sendall(self.serialized_response)
+    print(f'Sending response to: {self.address}')
+    total_sent = 0
+
+    while total_sent < len(self.serialized_response):
+      sent = self.socket.send(self.serialized_response[total_sent:])
+      total_sent += sent
