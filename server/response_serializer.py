@@ -14,6 +14,6 @@ class ResponseSerializer:
     self.response = response
     self.serialize_header()
     self.serialize_payload()
-    return self.serialize_header + self.serialize_payload
+    return self.serialized_header + self.serialized_payload
 
     

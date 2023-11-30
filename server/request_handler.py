@@ -38,6 +38,7 @@ class RequestHandler(Thread):
         break
 
       self.data += buffer
+
     
   def parse_request(self):
     if self.data:
@@ -54,7 +55,7 @@ class RequestHandler(Thread):
       self.response = ResponseProvider.make_response(None, 2107)
 
   def serialize_response(self):
-    self.serialize_response = self.response_serializer.serialize(self.response)
+    self.serialized_response = self.response_serializer.serialize(self.response)
 
   def send_response(self):
     self.socket.sendall(self.serialized_response)

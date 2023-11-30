@@ -85,7 +85,7 @@ class ReloginHandler(Handler):
     return ResponseProvider.make_response(request, 2105, encrypted_aes_key=encrypted_aes_key)
 
 class RegisterHandler(Handler):
-  def handle(self, request, **managers):
+  def handle(request, **managers):
     name = request.get_payload().get_name()
     client = managers.get('clients_manager').get_client_by_name(name)
 

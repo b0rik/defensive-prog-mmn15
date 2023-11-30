@@ -1,18 +1,21 @@
 #ifndef MESSAGE_H_
 #define MESSAGE_H_
 
+#include <vector>
 #include "header.h"
 #include "payload.h"
+#include <vector>
 
 class Message {
 public:
-  Message(const Header& header, const Payload& payload);
-  const Header& get_header();
-  const Payload& get_payload();
+  Message(Header& header, Payload& payload);
+  Header& get_header();
+  Payload& get_payload();
+  std::vector<uint8_t> to_bytes();
 
 private:
-  const Header& header;
-  const Payload& payload;
+  Header& header;
+  Payload& payload;
 };
 
 #endif // MESSAGE_H_
