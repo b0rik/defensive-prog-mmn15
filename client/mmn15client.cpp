@@ -29,7 +29,8 @@ int main() {
 
 
     // send request
-    client.send(request_in_bytes);
+    client.write(request_in_bytes);
+    client.read();
 
     // for (const auto& byte : response_in_bytes) {
     //   std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)byte << " ";

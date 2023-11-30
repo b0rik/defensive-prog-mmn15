@@ -1,6 +1,8 @@
 #include <boost/asio.hpp>
 #include <vector>
 #include "client.h"
+#include <iostream>
+#include <iomanip>
 
 Client::Client(boost::asio::io_context& io_context, const std::string& address, const std::string& port)
   : io_context(io_context)
@@ -14,8 +16,23 @@ void Client::connect() {
   boost::asio::connect(this->socket, endpoint);
 }
 
-void Client::send(std::vector<uint8_t> request_in_bytes) {
-  boost::asio::write(this->socket, boost::asio::buffer(request_in_bytes));
+void Client::write(std::vector<uint8_t> request_in_bytes) {
+  int total_bytes_written = 0;
+
+  while(total_bytes_written < request_in_bytes.size()) {
+    size_t bytes_written = boost::asio::write(this->socket, boost::asio::buffer(request_in_bytes));
+    total_bytes_written += bytes_written;
+  }
 }
-// std::vector<uint8_t> Client::receive() {
-// }
+
+std::vector<uint8_t> Client::read() {
+  std::vector<uint8_t> header;
+  header.resize(7);
+  boost::asio::read(this->socket, boost::asio::buffer(header));
+
+  for (const auto& byte : header) {
+    std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)byte << " ";
+  }
+
+  return header;
+}
