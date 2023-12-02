@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include "settings.h"
-#include "client.h"
+#include "connection.h"
 
 #include "payload.h"
 #include "header.h"
@@ -65,6 +65,11 @@ int main () {
   while (true) {
     serialized_response = connection.read();
     response = serialized.deserialize(resialized_response);
+
+    if (response.get_header().get_code() == OP.end) {
+      break;
+    }
+
     response_handler.handle(response);
   }
 }

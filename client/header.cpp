@@ -1,12 +1,7 @@
 #include <cstring>
 #include <vector>
 #include "header.h"
-
-template <typename T>
-void serialize_member(std::vector<uint8_t>& result, const T& data) {
-    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&data);
-    result.insert(result.end(), bytes, bytes + sizeof(T));
-}
+#include "serializer.h"
 
 Header::Header(const uint8_t& version, const uint16_t& code, const uint32_t& payload_size) 
   : version(version)
@@ -25,12 +20,22 @@ uint32_t Header::get_payload_size() {
   return this->payload_size;
 }
 
-std::vector<uint8_t> Header::to_bytes() {
-  std::vector<uint8_t> bytes;
-  serialize_member(bytes, this->version);
-  serialize_member(bytes, this->code);
-  serialize_member(bytes, this->payload_size);
-  return bytes;
+std::vector<uint8_t> Header::serialize(Serializer serializer) {
+  std::vector<uint8_t> version_bytes;
+  serializer.serialize(version_bytes, this->version);
+  
+  std::vector<uint8_t> code_bytes;
+  serializer.serialize(code_bytes, this->code);
+
+  std::vector<uint8_t> payload_size;
+  serializer.serialize(payload_size, this->payload_size);
+
+  std::vector<uint8_t> result;
+  result.insert(result.end(), version_bytes.begin(), version_bytes.end());
+  result.insert(result.end(), code_bytes.begin(), code_bytes.end());
+  result.insert(result.end(), payload_size.begin(), payload_size.end());
+
+  return result;
 }
 
 ResponseHeader::ResponseHeader(const uint8_t& version, const uint16_t& code, const uint32_t& payload_size) : Header(version, code, payload_size) {}
