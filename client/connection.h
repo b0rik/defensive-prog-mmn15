@@ -1,13 +1,13 @@
-#ifndef CLIENT_H_
-#define CLIENT_H_
+#ifndef CONNECTION_H_
+#define CONNECTION_H_
 
 #include <boost/asio.hpp>
 #include <string>
 #include <vector>
 
-class Client {
+class Connection {
 public:
-  Client(boost::asio::io_context& io_context, const std::string& address, const std::string& port);
+  Connection(boost::asio::io_context& io_context, const std::string& address, const std::string& port);
   void connect(); // add error handling maybe error return value
   void write(std::vector<uint8_t> request_in_bytes); // add error handling
   std::vector<uint8_t> read(); // add error handling
@@ -18,4 +18,4 @@ private:
   const std::string port;
 };
 
-#endif //CLIENT_H_
+#endif //CONNECTION_H_
