@@ -3,10 +3,9 @@
 #include <iomanip>
 #include "settings.h"
 #include "connection.h"
-
-#include "payload.h"
-#include "header.h"
-#include "message.h"
+#include "serializer.h"
+#include "request_provider.h"
+#include "response_handler.h"
 
 // int main() {
 //   Settings settings("transfer.info", "me.info");
@@ -54,20 +53,23 @@ int main () {
   connection.connect();
 
   if (settings.user_exists()) {
-    request = request_provider.get_request(OPS.login);
+    serialized_request = request_provider.get_request(OPS.login);
   } else {
-    request = request_provider.get_request(OPS.register);
+    serialized_request = request_provider.get_request(OPS.register);
   }
-
-  serialized_request = request.serialize(serializer);
   connection.write(serialized_request);
 
   while (true) {
-    serialized_response = connection.read();
-    response = serialized.deserialize(resialized_response);
+    std::vector<uint8_t> serialized_header;
+    serialized_header = connection.read(header.header_size);
+    Header header;
+    serializer.deserialize(serialized_header, header);
 
-    if (response.get_header().get_code() == OP.end) {
+    if (header.code == OP.end) {
       break;
+
+    std::vector<uint8_t> serialized_payload;
+    serialized_payload = connection.read(header.payload_size);
     }
 
     response_handler.handle(response);

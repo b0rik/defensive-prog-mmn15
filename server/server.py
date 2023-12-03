@@ -2,8 +2,7 @@ import socket
 from request_handler import RequestHandler
 
 class Server:
-  def __init__(self, address, port, database, clients_manager, files_manager, request_parser, response_serializer):
-    self.address = address
+  def __init__(self, port, database, clients_manager, files_manager, request_parser, response_serializer):
     self.port = port
     self.database = database
     self.clients_manager = clients_manager
@@ -16,7 +15,7 @@ class Server:
 
   def start(self):
     self.socket.listen()
-    print(f'Server started listening on {self.address}:{self.port}')
+    print(f'Server started listening on port: {self.port}')
     
     while True:
       client_socket, client_address = self.socket.accept()
