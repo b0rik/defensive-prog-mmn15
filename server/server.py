@@ -10,7 +10,7 @@ class Server:
     self.request_parser = request_parser
     self.response_serializer = response_serializer
     self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    self.socket.bind((self.address, self.port))
+    self.socket.bind(('localhost', self.port))
 
 
   def start(self):

@@ -42,6 +42,7 @@ class RequestHandler(Thread):
       self.data = self.socket.recv(num_of_bytes)
     except Exception as e:
       self.data = None
+    print(self.data)
 
   def parse_header(self):
     print(f'Parsing header from: {self.address}')
