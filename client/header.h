@@ -12,7 +12,7 @@ struct Header {
   const uint32_t payload_size;
 };
 
-struct ResponseHeader : public Header {}
+struct ResponseHeader : public Header {};
 
 struct RequestHeader : public Header {
   char client_id[16];

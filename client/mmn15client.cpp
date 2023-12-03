@@ -4,9 +4,9 @@
 #include "settings.h"
 #include "connection.h"
 #include "serializer.h"
-#include "request_provider.h"
-#include "response_handler.h"
-
+// #include "request_provider.h"
+// #include "response_handler.h"
+#include "message.h"
 // int main() {
 //   Settings settings("transfer.info", "me.info");
   
@@ -46,18 +46,21 @@ const KEY_FILE = "priv.key";
 int main () {
   Settings settings("transfer.info", "me.info");
   RequestProvider request_provider(settings);
-  SerializerBytes serializer;
   ResponseHandler response_handler(settings);
 
   Connection connection(settings.get_address(), settings.get_port());
   connection.connect();
 
-  if (settings.user_exists()) {
-    serialized_request = request_provider.get_request(OPS.login);
-  } else {
-    serialized_request = request_provider.get_request(OPS.register);
-  }
-  connection.write(serialized_request);
+  // if (settings.user_exists()) {
+  //   request = request_provider.get_request(OPS.login);
+  // } else {
+  //   request = request_provider.get_request(OPS.register);
+  // }
+  Message request;
+  request.header.version = 1;
+  request.header.code = 1025;
+  request << settings.get_name();
+  connection.write(request);
 
   while (true) {
     std::vector<uint8_t> serialized_header;
@@ -68,6 +71,7 @@ int main () {
     if (header.code == OP.end) {
       break;
 
+    Payload payload;
     std::vector<uint8_t> serialized_payload;
     serialized_payload = connection.read(header.payload_size);
     }
