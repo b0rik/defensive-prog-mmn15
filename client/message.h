@@ -36,10 +36,10 @@ struct Message {
   template <typename T>
   friend Message& operator << (Message& message, const T& data) {
     size_t size = message.payload.size();
-    message.body.resize(size + sizeof(T));
-    memcpy(message.body.data() + size, &data, sizeof(T));
+    message.payload.resize(size + sizeof(T));
+    memcpy(message.payload.data() + size, &data, sizeof(T));
 
-    message.header.payload_size = payload.size();
+    message.header.payload_size = message.payload.size();
     
     return message;
   }
@@ -47,12 +47,12 @@ struct Message {
   template <typename T>
   friend Message& operator >> (Message& message, T& data) {
     size_t size = message.payload.size() - sizeof(T);
-    memcpy(&data, message.body.data() + size, sizeof(T));
-    message.body.resize(size);
+    memcpy(&data, message.payload.data() + size, sizeof(T));
+    message.payload.resize(size);
 
-    message.header.payload_size = payload.size();
+    message.header.payload_size = message.payload.size();
     
-    return message
+    return message;
   }
 };
 

@@ -3,6 +3,7 @@
 #include "connection.h"
 #include <iostream>
 #include <iomanip>
+#include "message.h"
 
 Connection::Connection(boost::asio::io_context& io_context, const std::string& address, const std::string& port)
   : io_context(io_context)
@@ -16,23 +17,18 @@ void Connection::connect() {
   boost::asio::connect(this->socket, endpoint);
 }
 
-void Connection::write(std::vector<uint8_t> request_in_bytes) {
-  int total_bytes_written = 0;
-
-  while(total_bytes_written < request_in_bytes.size()) {
-    size_t bytes_written = boost::asio::write(this->socket, boost::asio::buffer(request_in_bytes));
-    total_bytes_written += bytes_written;
-  }
+void Connection::write(Message& message) {
+  boost::asio::write(this->socket, boost::asio::buffer(&message.header, sizeof(MessageHeader)));
+  boost::asio::write(this->socket, boost::asio::buffer(message.payload.data(), message.payload.size()));
 }
 
-std::vector<uint8_t> Connection::read() {
-  std::vector<uint8_t> header;
-  header.resize(7);
-  boost::asio::read(this->socket, boost::asio::buffer(header));
+Message Connection::read() {
+  Message message;
+  std::vector<uint8_t> buffer;
 
-  for (const auto& byte : header) {
-    std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)byte << " ";
-  }
+  boost::asio::read(this->socket, boost::asio::buffer(&message.header, sizeof(MessageHeader)));
+  message.payload.resize(message.header.payload_size);
+  boost::asio::read(this->socket, boost::asio::buffer(message.payload.data(), message.payload.size()));
 
-  return header;
+  return message;
 }
