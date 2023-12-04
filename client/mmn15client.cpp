@@ -33,9 +33,6 @@ int main () {
   request << x;
   connection.write(request);
   Message m = connection.read();
-  std::cout << m.header.code << std::endl;
-  std::cout << m.header.version << std::endl;
-  std::cout << m.header.payload_size << std::endl;
 
   // while (true) {
   //   std::vector<uint8_t> serialized_header;
