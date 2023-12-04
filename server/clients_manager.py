@@ -25,7 +25,7 @@ class ClientsManager:
   def register_client(self, name):
     id = uuid.uuid4()
     last_seen = datetime.now()
-    client = Client(id, name, None, last_seen, None)
+    client = Client(id.bytes, name, None, last_seen, None)
     
     self.db.insert_client(client)
     self.clients.append(client)

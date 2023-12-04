@@ -11,7 +11,7 @@ class FilePayloadParser(PayloadParser):
 
   def parse(data):
     file_name = struct.unpack(FilePayloadParser.PROTOCOL_PAYLOAD_FORMAT, data)[0]
-    payload = pl.RequestFilePayload(file_name.rstrip(b'\x00'))
+    payload = pl.RequestFilePayload(file_name.rstrip(b'\x00').decode('utf-8'))
     return payload
 
 class PublicKeyPayloadParser(PayloadParser):
@@ -19,7 +19,7 @@ class PublicKeyPayloadParser(PayloadParser):
 
   def parse(data):
     name, public_key = struct.unpack(PublicKeyPayloadParser.PROTOCOL_PAYLOAD_FORMAT, data)
-    payload = pl.RequestPublicKeyPayload(name.rstrip(b'\x00'), public_key.rstrip(b'\x00'))
+    payload = pl.RequestPublicKeyPayload(name.rstrip(b'\x00').decode('utf-8'), public_key.rstrip(b'\x00').decode('utf-8'))
     return payload
 
 class SentFilePayloadParser(PayloadParser):
@@ -29,7 +29,7 @@ class SentFilePayloadParser(PayloadParser):
   def parse(data):
     content_size, file_name = struct.unpack(SentFilePayloadParser.PROTOCOL_PAYLOAD_FORMAT, data[:SentFilePayloadParser.PAYLOAD_SIZE])
     message_content = struct.unpack(f'<{(content_size)}s', data[SentFilePayloadParser.PAYLOAD_SIZE:SentFilePayloadParser.PAYLOAD_SIZE + content_size])[0]
-    payload = pl.RequestSentFilePayload(content_size, file_name.rstrip(b'\x00'), message_content)
+    payload = pl.RequestSentFilePayload(content_size, file_name.rstrip(b'\x00').decode('utf-8'), message_content.decode('utf-8'))
     return payload
 
 class UserPayloadParser(PayloadParser):
@@ -37,5 +37,5 @@ class UserPayloadParser(PayloadParser):
 
   def parse(data):
     name = struct.unpack(UserPayloadParser.PROTOCOL_PAYLOAD_FORMAT, data)[0]
-    payload = pl.RequestUserPayload(name.rstrip(b'\x00'))
+    payload = pl.RequestUserPayload(name.rstrip(b'\x00').decode('utf-8'))
     return payload

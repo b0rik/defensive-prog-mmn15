@@ -94,12 +94,13 @@ class RegisterHandler(Handler):
         raise Exception('Client already exists')
 
       managers.get('clients_manager').register_client(name)
-    except:
+    except Exception as e:
       # send response 2101
+      print(e)
       return ResponseProvider.make_response(request, 2101)
 
     # send response 2100
-    return ResponseProvider.make_response(request, 2100)
+    return ResponseProvider.make_response(request=request, code=2100, id=managers.get('clients_manager').get_client_by_name(name).get_id())
 
 class PublicKeyHandler(Handler):
   def handle(self, request, **managers):

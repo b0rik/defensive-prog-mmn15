@@ -8,19 +8,19 @@ class ResponseProvider():
   def make_response(request, code, **data):
     match code:
       case 2104 | 2106 | 2100:
-        payload = pl.ResponsePayload(request.get_header().get_client_id())
+        payload = pl.ResponsePayload(data.get('id'))
       case 2107 | 2101:
         payload = pl.ResponseEmptyPayload()
       case 2103:
         payload = pl.ResponseReceiveFilePayload(
-          request.get_header().get_client_id(),
+          data.get('id'),
           request.get_payload().get_content_size(), 
           request.get_payload().get_file_name(), 
           data.get('checksum')
         )
       case 2105 | 2102:
         payload = pl.ResponseKeyPayload(
-          request.get_header().get_client_id(),
+          data.get('id'),
           data.get('encrypted_aes_key')
         )
       

@@ -45,8 +45,6 @@ class RequestHandler(Thread):
       self.data = None
       print(e)
 
-    print(self.data)
-
   def parse_header(self):
     print(f'Parsing header from: {self.address}')
     header = self.request_parser.parse_header(self.data)

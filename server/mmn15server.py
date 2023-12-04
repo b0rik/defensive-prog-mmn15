@@ -7,7 +7,7 @@ from response_serializer import ResponseSerializer
 from db import DB
 
 PORT = get_port()
-DB_NAME = 'defensive'
+DB_NAME = 'defensive.db'
 
 if __name__ == '__main__':
   database = DB(DB_NAME)
@@ -18,4 +18,5 @@ if __name__ == '__main__':
 
   server = Server(PORT, database, clients_manager, files_manager, request_parser, response_serializer)
   server.start()
+
   

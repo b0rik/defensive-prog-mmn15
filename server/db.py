@@ -9,7 +9,8 @@ from file import File
 class DB:
     def __init__(self, db_name):
       self.connection = sqlite3.connect(
-        db_name, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
+        db_name, detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
+        check_same_thread=False
       )
       print(f'Created conection to database {db_name}.')
 
@@ -24,8 +25,8 @@ class DB:
         cursor = conn.cursor()
         cursor.execute('''
           CREATE TABLE IF NOT EXISTS clients (
-            ID VARCHAR(16) PRIMARY KEY,
-            Name VARCHAR(255) NOT NULL UNIQUE,
+            ID BLOB(16),
+            Name VARCHAR(255) PRIMARY KEY,
             PublicKey VARCHAR(160),
             LastSeen TIMESTAMP NOT NULL,
             AESKey VARCHAR(16)
@@ -71,7 +72,7 @@ class DB:
         cursor.execute('''
           INSERT INTO clients (ID, Name, PublicKey, LastSeen, AESKey)
           VALUES (?, ?, ?, ?, ?)
-        ''', client.get_id(), client.get_name(), client.get_public_key(), client.get_last_seen(), client.get_aes_key())
+        ''', (client.get_id(), client.get_name(), client.get_public_key(), client.get_last_seen(), client.get_aes_key()))
     
     def insert_file(self, file):
       with self.connection as conn:
