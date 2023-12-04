@@ -60,8 +60,10 @@ int main () {
   Message request;
   memcpy(request.header.client_id, "ABCDEFGHIJKLMNOP", 16);
   request.header.version = 1;
-  request.header.code = 260;
-  request << settings.get_name();
+  request.header.code = 1025;
+  char x[255];
+  strncpy(x, settings.get_name().c_str(), 255);
+  request << x;
   connection.write(request);
   Message m = connection.read();
   std::cout << m.header.code << std::endl;
