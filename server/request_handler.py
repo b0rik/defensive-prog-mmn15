@@ -36,12 +36,15 @@ class RequestHandler(Thread):
   def receive_data(self, num_of_bytes): 
     print(f'receiving {num_of_bytes} bytes of data from: {self.address}')
 
-    self.data = b''
-    
     try:
-      self.data = self.socket.recv(num_of_bytes)
+      while True:
+        self.data = self.socket.recv(num_of_bytes)
+        if len(self.data) > 0:
+          break
     except Exception as e:
       self.data = None
+      print(e)
+
     print(self.data)
 
   def parse_header(self):

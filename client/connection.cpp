@@ -26,9 +26,9 @@ Message Connection::read() {
   Message message;
   std::vector<uint8_t> buffer;
 
-  boost::asio::read(this->socket, boost::asio::buffer(&message.header, sizeof(MessageHeader)));
+  boost::asio::read(this->socket, boost::asio::buffer(&message.header, sizeof(MessageHeader) - 16));
   message.payload.resize(message.header.payload_size);
   boost::asio::read(this->socket, boost::asio::buffer(message.payload.data(), message.payload.size()));
-
+  
   return message;
 }
