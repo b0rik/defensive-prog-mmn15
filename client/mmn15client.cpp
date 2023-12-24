@@ -1,53 +1,78 @@
 #include <boost/asio.hpp>
 #include <iostream>
-#include <iomanip>
-#include "settings.h"
+#include "session.h"
 #include "connection.h"
-// #include "request_provider.h"
-// #include "response_handler.h"
+#include "request_provider.h"
+#include "response_handler.h"
 #include "message.h"
 
-const std::string INFO_FILE = "transfer.info";
-const std::string USER_FILE = "me.info";
-const std::string KEY_FILE = "priv.key";
-int main () {
-  Settings settings("transfer.info", "me.info");
-  // RequestProvider request_provider(settings);
-  // ResponseHandler response_handler(settings);
+int main() {
+    // init session data
+    try {
+        std::cout << "initialiing session..." << std::endl;
+        Session session;
+        std::cout << "session initialized." << std::endl;
 
-  boost::asio::io_context io_context;
-  Connection connection(io_context, settings.get_address(), settings.get_port());
-  connection.connect();
+        // init connection
+        std::cout << "connecting to the server..." << std::endl;
+        boost::asio::io_context io_context;
+        Connection connection(io_context, session.get_address(), session.get_port());
+  
+        // connect to server
+        connection.connect();
+        std::cout << "connected to the server." << std::endl;
 
-  // if (settings.user_exists()) {
-  //   request = request_provider.get_request(OPS.login);
-  // } else {
-  //   request = request_provider.get_request(OPS.register);
-  // }
-  Message request;
-  memcpy(request.header.client_id, "ABCDEFGHIJKLMNOP", 16);
-  request.header.version = 1;
-  request.header.code = 1025;
-  char x[255];
-  strncpy(x, settings.get_name().c_str(), 255);
-  request << x;
-  connection.write(request);
-  Message m = connection.read();
+        // set first request
+        session.set_request_code(session.get_user_exists() ? 1027 : 1025);
 
-  // while (true) {
-  //   std::vector<uint8_t> serialized_header;
-  //   serialized_header = connection.read(header.header_size);
-  //   Header header;
-  //   serializer.deserialize(serialized_header, header);
+        RequestProvider request_provider(session);
+        ResponseHandler response_handler(session);
 
-  //   if (header.code == OP.end) {
-  //     break;
+        // start communication loop
+        while (!session.get_is_done()) {
+            // generate request
+            std::cout << "making request " << session.get_request_code() << std::endl;
+            Message request;
 
-  //   Payload payload;
-  //   std::vector<uint8_t> serialized_payload;
-  //   serialized_payload = connection.read(header.payload_size);
-  //   }
+            try {
+                request_provider.make_request(request);
+            } 
+            catch (std::exception& e) {
+                std::cout << e.what() << std::endl;
+                throw std::exception("failed to make request.");
+            }
+            std::cout << "made request." << std::endl;
 
-  //   response_handler.handle(response);
-  // }
+            // send request
+            std::cout << "sending request..." << std::endl;
+            connection.send(request);
+            std::cout << "request sent." << std::endl;
+
+            // if current request is 1030 then skip the reading and immediately send request 1028
+            if (session.get_request_code() == 1030) {
+                session.set_request_code(1028);
+                continue;
+            }
+
+            // read response
+            Message response;
+    
+            std::cout << "receiving response..." << std::endl;
+            connection.receive(response);
+            std::cout << "response received." << response.header.code << std::endl;
+
+            // handler response
+            std::cout << "handling response..." << std::endl;
+            response_handler.handle(response);
+            std::cout << "response handled." << std::endl;
+        }
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
+   
+    std::cout << "Terminating...\n";
+
+    return 0; 
+
 }

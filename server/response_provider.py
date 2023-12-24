@@ -2,7 +2,7 @@ from header import ResponseHeader
 import payload as pl
 from message import Message
 
-SERVER_VERSION = 1
+SERVER_VERSION = 3
 
 class ResponseProvider():
   def make_response(request, code, **data):
@@ -23,9 +23,8 @@ class ResponseProvider():
           data.get('id'),
           data.get('encrypted_aes_key')
         )
-      
-    payload_size = payload.get_size()
-    header = ResponseHeader(SERVER_VERSION, code, payload_size)
+    
+    header = ResponseHeader(SERVER_VERSION, code)
     response = Message()
     response.set_header(header)
     response.set_payload(payload)

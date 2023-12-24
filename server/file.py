@@ -1,12 +1,12 @@
 class File:
-  def __init__(self, id, file_name, path_name, verified):
-    self.id = id
+  def __init__(self, client_id, file_name, path_name, verified):
+    self.client_id = client_id
     self.file_name = file_name
     self.path_name = path_name
     self.verified = verified
 
-  def get_id(self):
-    return self.id
+  def get_client_id(self):
+    return self.client_id
   
   def get_file_name(self):
     return self.file_name
