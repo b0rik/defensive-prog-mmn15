@@ -18,9 +18,9 @@ int main() {
         boost::asio::io_context io_context;
         Connection connection(io_context, session.get_address(), session.get_port());
   
-        // connect to server
-        //connection.connect();
-        //std::cout << "connected to the server." << std::endl << std::endl;
+         // connect to server
+        connection.connect();
+        // std::cout << "connected to the server." << std::endl << std::endl;
 
         // set first request
         session.set_request_code(session.get_user_exists() ? 1027 : 1025);
@@ -45,7 +45,6 @@ int main() {
 
             // send request
             std::cout << "sending request..." << std::endl;
-            connection.connect();
             connection.send(request);
             std::cout << "request sent." << std::endl << std::endl;
 
@@ -60,7 +59,6 @@ int main() {
     
             std::cout << "receiving response..." << std::endl;
             connection.receive(response);
-            connection.disconnect();
             std::cout << "response received " << response.header.code << std::endl << std::endl;
 
             // handler response
@@ -72,7 +70,7 @@ int main() {
     catch (std::exception& e) {
         std::cout << e.what() << std::endl;
     }
-   
+    
     std::cout << "Terminating...\n";
     system("pause");
 
