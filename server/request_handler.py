@@ -7,10 +7,9 @@ from header_parser import HEADER_SIZE
 PACKET_SIZE = 1024
 
 class RequestHandler(Thread):
-  def __init__(self, socket, address, clients_manager, files_manager, request_parser, response_serializer):
+  def __init__(self, request_queue, clients_manager, files_manager, request_parser, response_serializer):
     super().__init__()
-    self.socket = socket
-    self.address = address
+    self.request_queue = request_queue
     self.clients_manager = clients_manager
     self.files_manager = files_manager
     self.request_parser = request_parser
