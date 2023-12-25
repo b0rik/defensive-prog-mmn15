@@ -27,7 +27,7 @@ class CRCFailAbortHandler(Handler):
       print(f'handling bad crc {request.get_header().get_code()} and aborting from client {client_id}\n')
     except Exception as e:
       print(e)
-      return ResponseProvider.make_response(request, 2107)
+      raise Exception('failed to handle crc fail and abort')
 
     # send response 2104
     return ResponseProvider.make_response(request, 2104, id=client_id)
@@ -48,7 +48,7 @@ class CRCFailHandler(Handler):
       print(f'handling bad crc {request.get_header().get_code()} from client {client_id}\n')
     except Exception as e:
       print(e)
-      return ResponseProvider.make_response(request, 2107)
+      raise Exception('failed to handle crc fail')
     
     return None
 
@@ -65,8 +65,7 @@ class CRCOkHandler(Handler):
       print(f'handling crc ok request {request.get_header().get_code()} from client {client_id} with file {file_name}\n')
     except Exception as e:
       print(e)
-      # send response 2107
-      return ResponseProvider.make_response(request, 2107)
+      raise Exception('failed to set crc ok')
 
     # send response 2104
     return ResponseProvider.make_response(request, 2104, id=client_id)
@@ -75,16 +74,20 @@ class SentFileHandler(Handler):
   def handle(request, **managers):
     try:
       client_id = request.get_header().get_client_id()
-
-      managers.get('clients_manager').update_last_seen_by_id(client_id) 
       client = managers.get('clients_manager').get_client_by_id(client_id)
+      managers.get('clients_manager').update_last_seen_by_id(client_id)
+
+      # get aes key
       aes_key = client.get_aes_key()
       message_content = request.get_payload().get_message_content()
+
+      # decrypt file
       decrypted_file = Crypt.aes_decrypt(aes_key, message_content)
       file_name = request.get_payload().get_file_name()
       user_files_dir = f'{FILES_PATH}/{client_id}'
       file_path = f'{FILES_PATH}/{client_id}/{file_name}'
 
+      # save file
       if not path.exists(FILES_PATH):
         mkdir(FILES_PATH)
 
@@ -101,8 +104,7 @@ class SentFileHandler(Handler):
 
     except Exception as e:
       print(e)
-      # send response 2107
-      return ResponseProvider.make_response(request, 2107)
+      raise Exception('failed to handle file request')
 
     # calculate checksum
     checksum = memcrc(decrypted_file)
@@ -120,10 +122,12 @@ class ReloginHandler(Handler):
       client_name = request.get_payload().get_name()
       client = managers.get('clients_manager').get_client_by_name(client_name)
 
+      # if no client exists with that name or client has not public key
       if not client or not client.get_public_key():
         # send respone 2106
         return ResponseProvider.make_response(request, 2106, id=request.get_header().get_client_id())
       
+      # generate aes key
       managers.get('clients_manager').update_last_seen_by_name(client_name) 
       aes_key = Crypt.generate_aes_key()
       managers.get('clients_manager').save_aes_key(client_name, aes_key)
@@ -133,8 +137,7 @@ class ReloginHandler(Handler):
       print(f'handling relogin request {request.get_header().get_code()} from client {client_name} with id {managers.get("clients_manager").get_client_by_name(client_name).get_id()} and aes key {aes_key.hex()}\n')
     except Exception as e:
       print(e)
-      # send response 2107
-      return ResponseProvider.make_response(request, 2107)
+      raise Exception('failed to relogin client')
  
     # send response 2105
     return ResponseProvider.make_response(request, 2105, id=client.get_id(), encrypted_aes_key=encrypted_aes_key)
@@ -145,8 +148,10 @@ class RegisterHandler(Handler):
       client_name = request.get_payload().get_name()
       client = managers.get('clients_manager').get_client_by_name(client_name)
     
+      # if client with that name already exists
       if client:
-        raise Exception('Client already exists')
+        # send response 2101
+        return ResponseProvider.make_response(request, 2101)
       
       managers.get('clients_manager').register_client(client_name)
       managers.get('clients_manager').update_last_seen_by_name(client_name) 
@@ -156,9 +161,8 @@ class RegisterHandler(Handler):
       # send response 2100
       return ResponseProvider.make_response(request=request, code=2100, id=managers.get('clients_manager').get_client_by_name(client_name).get_id())
     except Exception as e:
-      # send response 2101
       print(e)
-      return ResponseProvider.make_response(request, 2101)
+      raise Exception('failed to register client')
     
 class PublicKeyHandler(Handler):
   def handle(request, **managers):
@@ -166,6 +170,7 @@ class PublicKeyHandler(Handler):
       client_name = request.get_payload().get_name()
       public_key = request.get_payload().get_public_key()
 
+      # generate aes key
       managers.get('clients_manager').update_last_seen_by_name(client_name) 
       aes_key = Crypt.generate_aes_key()
       encrypted_aes_key = Crypt.rsa_encrypt(public_key, aes_key)
@@ -180,5 +185,5 @@ class PublicKeyHandler(Handler):
     except Exception as e:
       # send response 2107
       print(e)
-      return ResponseProvider.make_response(request, 2107)
+      raise Exception('failed to handle public key')
     

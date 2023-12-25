@@ -1,22 +1,22 @@
 from threading import Lock, Condition
 
-class RequestQueue:
+class ConnectionsQueue:
   def __init__(self):
-    self.requests = []
+    self.connections = []
     self.lock = Lock()
     self.condition = Condition()
 
-  def add_request(self, request):
+  def add_connection(self, request):
     with self.condition:
       with self.lock:
-        self.requests.append(request)
+        self.connections.append(request)
 
       self.condition.notify()
 
-  def get_request(self):
+  def get_connection(self):
     with self.condition:
-      while not self.requests:
+      while not self.connections:
         self.condition.wait()
 
       with self.lock:
-        return self.requests.pop(0)
+        return self.connections.pop(0)

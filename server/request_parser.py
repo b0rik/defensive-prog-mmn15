@@ -2,20 +2,19 @@ from header_parser import HeaderParser
 from payload_parser_provider import PayloadParserProvider
 
 class RequestParser:
-  def parse_header(self, data):
+  def parse_header(data):
     try:
-      self.header = HeaderParser.parse(data)
-      return self.header
+      header = HeaderParser.parse(data)
+      return header
     except Exception as e:
       print(e)
       raise Exception('failed to parse header')
      
-  def parse_payload(self, data):
+  def parse_payload(code, data):
     try:
-      request_code = self.header.get_code()
-      payload_parser = PayloadParserProvider.get_payload_parser(request_code)
-      self.payload = payload_parser.parse(data)
-      return self.payload
+      payload_parser = PayloadParserProvider.get_payload_parser(code)
+      payload = payload_parser.parse(data)
+      return payload
     except Exception as e:
       print(e)
       raise Exception('failed to parse payload')

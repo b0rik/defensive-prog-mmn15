@@ -33,8 +33,6 @@ class ResponseProvider():
         print(f'making response {code} for client {data.get("id")} with aes key\n')
     
     header = ResponseHeader(SERVER_VERSION, code)
-    response = Message()
-    response.set_header(header)
-    response.set_payload(payload)
+    response = Message(header, payload)
     
     return response
