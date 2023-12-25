@@ -36,4 +36,5 @@ class ResponseProvider():
     response = Message()
     response.set_header(header)
     response.set_payload(payload)
+    
     return response

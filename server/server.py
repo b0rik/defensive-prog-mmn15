@@ -25,23 +25,21 @@ class Server:
 
   def start(self):
     try:
+      RequestHandler(
+        self.request_queue,
+        self.clients_manager,
+        self.files_manager,
+        self.response_serializer
+      ).start()
+      
       self.socket.listen()
       print(f'Server started listening on port: {self.port}')
-      
+
       while True:
         client_socket, client_address = self.socket.accept()
         request = self.receive_request(client_socket)
+        print(f'adding to queue {request.get_header().get_code()} from {client_address}\n')
         self.request_queue.add_request((client_socket, client_address, request))
-        request_handler_thread = RequestHandler(
-          client_socket,
-          client_address,
-          self.clients_manager,
-          self.files_manager,
-          self.request_parser,
-          self.response_serializer
-        )
-        
-        request_handler_thread.start()
     except Exception as e:
       print(e)
       raise Exception('server failed')
