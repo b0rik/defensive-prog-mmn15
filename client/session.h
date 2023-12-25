@@ -3,6 +3,10 @@
 #include <cstdint>
 #include "message.h"
 
+const size_t NAME_SIZE = 255;
+const size_t PUBLIC_RSA_KEY_SIZE = 160;
+const size_t FILE_NAME_SIZE = 255;
+
 const std::string INFO_FILE = "transfer.info";
 const std::string USER_FILE = "me.info";
 const std::string KEY_FILE = "priv.key";

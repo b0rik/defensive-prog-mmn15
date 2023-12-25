@@ -50,6 +50,9 @@ void RequestProvider::make_name_request(Message& request) {
     memcpy(name.data(), this->session.get_name().data(), this->session.get_name().size());
 
     request << name;
+
+    // printing for video
+    std::cout << "making request with name: " << session.get_name() << std::endl;
 }
 
 void RequestProvider::make_key_request(Message& request) {
@@ -76,6 +79,9 @@ void RequestProvider::make_key_request(Message& request) {
     }
 
     request << pubkey;
+
+    // printing for video
+    std::cout << "making request with public key: " << utils::bytes_to_hex_string(pubkey) << std::endl;
 }
 
 void RequestProvider::make_file_request(Message& request) {
@@ -103,8 +109,9 @@ void RequestProvider::make_file_request(Message& request) {
         AESWrapper aes((const unsigned char*)aes_key.data(), aes_key.size());
         encrypted_file = aes.encrypt((char*)file_content.data(), file_content.size());
     } 
-    catch (...) {
+    catch (std::exception& e) {
     // fail to encrypt file
+        std::cout << e.what() << std::endl;
         throw std::exception("failed to encrypt file.");
     }
 
@@ -114,6 +121,9 @@ void RequestProvider::make_file_request(Message& request) {
     request << content_size;
     make_crc_request(request);
     request << encrypted_file;
+
+    // printing for video
+    std::cout << "making request with file size " << content_size << std::endl;
 }
 
 void RequestProvider::make_crc_request(Message& request) {
@@ -121,4 +131,7 @@ void RequestProvider::make_crc_request(Message& request) {
     memcpy(file_name.data(), this->session.get_file_name().data(), this->session.get_file_name().size());
 
     request << file_name;
+
+    // printing for video
+    std::cout << "making request with file name: " << session.get_file_name() << std::endl;
 }

@@ -11,7 +11,7 @@ int main() {
     try {
         std::cout << "initialiing session..." << std::endl;
         Session session;
-        std::cout << "session initialized." << std::endl;
+        std::cout << "session initialized." << std::endl << std::endl;;
 
         // init connection
         std::cout << "connecting to the server..." << std::endl;
@@ -20,7 +20,7 @@ int main() {
   
         // connect to server
         connection.connect();
-        std::cout << "connected to the server." << std::endl;
+        std::cout << "connected to the server." << std::endl << std::endl;
 
         // set first request
         session.set_request_code(session.get_user_exists() ? 1027 : 1025);
@@ -41,12 +41,12 @@ int main() {
                 std::cout << e.what() << std::endl;
                 throw std::exception("failed to make request.");
             }
-            std::cout << "made request." << std::endl;
+            std::cout << "made request." << std::endl << std::endl;
 
             // send request
             std::cout << "sending request..." << std::endl;
             connection.send(request);
-            std::cout << "request sent." << std::endl;
+            std::cout << "request sent." << std::endl << std::endl;
 
             // if current request is 1030 then skip the reading and immediately send request 1028
             if (session.get_request_code() == 1030) {
@@ -59,12 +59,12 @@ int main() {
     
             std::cout << "receiving response..." << std::endl;
             connection.receive(response);
-            std::cout << "response received." << response.header.code << std::endl;
+            std::cout << "response received " << response.header.code << std::endl << std::endl;
 
             // handler response
             std::cout << "handling response..." << std::endl;
             response_handler.handle(response);
-            std::cout << "response handled." << std::endl;
+            std::cout << "response handled." << std::endl << std::endl;
         }
     }
     catch (std::exception& e) {
@@ -72,6 +72,7 @@ int main() {
     }
    
     std::cout << "Terminating...\n";
+    system("pause");
 
     return 0; 
 

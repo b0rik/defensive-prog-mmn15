@@ -30,7 +30,7 @@ class Server:
           self.request_parser,
           self.response_serializer
         )
-
+        
         request_handler_thread.start()
     except Exception as e:
       print(e)

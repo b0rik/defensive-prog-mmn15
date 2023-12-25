@@ -14,15 +14,17 @@ class Handler(ABC):
 class CRCFailAbortHandler(Handler):
   def handle(request, **managers):
     # delete the file
-    client_id = request.get_header().get_client_id()
-    file_name = request.get_payload().get_file_name()
-    file_path = f'{FILES_PATH}/{client_id}/{file_name}'
-    remove(file_path)
-
     try:
+      client_id = request.get_header().get_client_id()
+      file_name = request.get_payload().get_file_name()
+      file_path = f'{FILES_PATH}/{client_id}/{file_name}'
+      remove(file_path)
+
       managers.get('clients_manager').update_last_seen_by_id(client_id) 
       managers.get('files_manager').remove_file(client_id, file_name)
 
+      # printing for video 
+      print(f'handling bad crc {request.get_header().get_code()} and aborting from client {client_id}\n')
     except Exception as e:
       print(e)
       return ResponseProvider.make_response(request, 2107)
@@ -33,14 +35,17 @@ class CRCFailAbortHandler(Handler):
 class CRCFailHandler(Handler):
   def handle(request, **managers):
     # delete the file
-    client_id = request.get_header().get_client_id()
-    file_name = request.get_payload().get_file_name()
-    file_path = f'{FILES_PATH}/{client_id}/{file_name}'
-    remove(file_path)
-
     try:
+      client_id = request.get_header().get_client_id()
+      file_name = request.get_payload().get_file_name()
+      file_path = f'{FILES_PATH}/{client_id}/{file_name}'
+      remove(file_path)
+    
       managers.get('clients_manager').update_last_seen_by_id(client_id) 
       managers.get('files_manager').remove_file(client_id, file_name)
+
+      # printing for video
+      print(f'handling bad crc {request.get_header().get_code()} from client {client_id}\n')
     except Exception as e:
       print(e)
       return ResponseProvider.make_response(request, 2107)
@@ -49,12 +54,15 @@ class CRCFailHandler(Handler):
 
 class CRCOkHandler(Handler):
   def handle(request, **managers):
-    client_id = request.get_header().get_client_id()
-    file_name = request.get_payload().get_file_name()
-
     try:
+      client_id = request.get_header().get_client_id()
+      file_name = request.get_payload().get_file_name()
+
       managers.get('clients_manager').update_last_seen_by_id(client_id) 
       managers.get('files_manager').set_crc_ok(client_id, file_name)
+
+      # printing for video
+      print(f'handling crc ok request {request.get_header().get_code()} from client {client_id} with file {file_name}\n')
     except Exception as e:
       print(e)
       # send response 2107
@@ -65,9 +73,9 @@ class CRCOkHandler(Handler):
 
 class SentFileHandler(Handler):
   def handle(request, **managers):
-    client_id = request.get_header().get_client_id()
-
     try:
+      client_id = request.get_header().get_client_id()
+
       managers.get('clients_manager').update_last_seen_by_id(client_id) 
       client = managers.get('clients_manager').get_client_by_id(client_id)
       aes_key = client.get_aes_key()
@@ -98,6 +106,11 @@ class SentFileHandler(Handler):
 
     # calculate checksum
     checksum = memcrc(decrypted_file)
+
+    # printing for video
+    print(f'handling request {request.get_header().get_code()} with file {file_name} sent from client {client_id}\n')
+    # printing for video
+
     # send response 2103
     return ResponseProvider.make_response(request, 2103, id=client_id, checksum=checksum)
 
@@ -115,6 +128,9 @@ class ReloginHandler(Handler):
       aes_key = Crypt.generate_aes_key()
       managers.get('clients_manager').save_aes_key(client_name, aes_key)
       encrypted_aes_key = Crypt.rsa_encrypt(client.get_public_key(), aes_key)
+
+      # printing for video
+      print(f'handling relogin request {request.get_header().get_code()} from client {client_name} with id {managers.get("clients_manager").get_client_by_name(client_name).get_id()} and aes key {aes_key.hex()}\n')
     except Exception as e:
       print(e)
       # send response 2107
@@ -125,15 +141,18 @@ class ReloginHandler(Handler):
 
 class RegisterHandler(Handler):
   def handle(request, **managers):
-    client_name = request.get_payload().get_name()
     try:
+      client_name = request.get_payload().get_name()
       client = managers.get('clients_manager').get_client_by_name(client_name)
     
       if client:
         raise Exception('Client already exists')
+      
       managers.get('clients_manager').register_client(client_name)
       managers.get('clients_manager').update_last_seen_by_name(client_name) 
-      print('here')
+
+      # printing for video
+      print(f'handling register request {request.get_header().get_code()} from client {client_name}\n')
       # send response 2100
       return ResponseProvider.make_response(request=request, code=2100, id=managers.get('clients_manager').get_client_by_name(client_name).get_id())
     except Exception as e:
@@ -143,16 +162,19 @@ class RegisterHandler(Handler):
     
 class PublicKeyHandler(Handler):
   def handle(request, **managers):
-    client_name = request.get_payload().get_name()
-    public_key = request.get_payload().get_public_key()
-
     try:
+      client_name = request.get_payload().get_name()
+      public_key = request.get_payload().get_public_key()
+
       managers.get('clients_manager').update_last_seen_by_name(client_name) 
       aes_key = Crypt.generate_aes_key()
       encrypted_aes_key = Crypt.rsa_encrypt(public_key, aes_key)
       managers.get('clients_manager').save_public_key(client_name, public_key)
       managers.get('clients_manager').save_aes_key(client_name, aes_key)
       
+      # printing for video
+      print(f'handling public key request {request.get_header().get_code()} from client {client_name} with id {managers.get("clients_manager").get_client_by_name(client_name).get_id()} and public key {public_key.hex()}\n')
+
       # send response 2102 
       return ResponseProvider.make_response(request, 2102, id=managers.get('clients_manager').get_client_by_name(client_name).get_id(), encrypted_aes_key=encrypted_aes_key)
     except Exception as e:

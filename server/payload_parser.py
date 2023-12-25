@@ -14,7 +14,8 @@ class FilePayloadParser(PayloadParser):
       file_name = struct.unpack(FilePayloadParser.PROTOCOL_PAYLOAD_FORMAT, data)[0]
       payload = pl.RequestFilePayload(file_name.rstrip(b'\x00').decode('utf-8'))
       return payload
-    except:
+    except Exception as e:
+      print(e)
       raise Exception('failed to parse file payload')
 
 class PublicKeyPayloadParser(PayloadParser):
@@ -25,7 +26,8 @@ class PublicKeyPayloadParser(PayloadParser):
       name, public_key = struct.unpack(PublicKeyPayloadParser.PROTOCOL_PAYLOAD_FORMAT, data)
       payload = pl.RequestPublicKeyPayload(name.rstrip(b'\x00').decode('utf-8'), public_key)
       return payload
-    except:
+    except Exception as e:
+      print(e)
       raise Exception('failed to parse public key payload')
 
 class SentFilePayloadParser(PayloadParser):
@@ -38,7 +40,8 @@ class SentFilePayloadParser(PayloadParser):
       message_content = struct.unpack(f'<{(content_size)}s', data[SentFilePayloadParser.PAYLOAD_CONST_PART_SIZE:SentFilePayloadParser.PAYLOAD_CONST_PART_SIZE + content_size])[0]
       payload = pl.RequestSentFilePayload(content_size, file_name.rstrip(b'\x00').decode('utf-8'), message_content)
       return payload
-    except:
+    except Exception as e:
+      print(e)
       raise Exception('failed to parse sent file payload')
 
 class UserPayloadParser(PayloadParser):
@@ -50,5 +53,6 @@ class UserPayloadParser(PayloadParser):
       payload = pl.RequestUserPayload(name.rstrip(b'\x00').decode('utf-8'))
 
       return payload
-    except: 
+    except Exception as e:
+      print(e)
       raise Exception('failed to parse user payload')

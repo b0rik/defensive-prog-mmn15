@@ -4,9 +4,6 @@
 #include "message.h"
 
 const uint8_t VERSION = 3;
-const size_t NAME_SIZE = 255;
-const size_t PUBLIC_RSA_KEY_SIZE = 160;
-const size_t FILE_NAME_SIZE = 255;
 
 class RequestProvider {
 public:

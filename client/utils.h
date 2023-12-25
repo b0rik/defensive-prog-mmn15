@@ -20,7 +20,7 @@ namespace utils {
     return (*(reinterpret_cast<char*>(&test)) == 0);
     }
 
-    inline std::string bytes_to_hex_string(std::string& buffer) {
+    inline std::string bytes_to_hex_string( const std::string& buffer) {
     std::ostringstream ret;
     for (size_t i = 0; i < buffer.size(); i++)
         ret << std::hex << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]);

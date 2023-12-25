@@ -57,6 +57,9 @@ void ResponseHandler::handle_success_register(Message& response) {
     this->session.reset_tries();
 
     this->session.set_request_code(1026);
+
+    // printing for video
+    std::cout << "handling response with successfull register id: " << hex_id << std::endl;
 }
 
 void ResponseHandler::handle_fail_register(Message& response) {
@@ -77,13 +80,14 @@ void ResponseHandler::handle_aes_key(Message& response) {
         std::string decrypted_aes_key = rsapriv.decrypt(encrypted_aes_key);
         this->session.set_aes_key(decrypted_aes_key);
     }
-    catch (...) {
+    catch (std::exception& e) {
     // fail decrypt aes key
         if (this->session.get_tries() < MAX_TRIES) {
             this->session.increment_tries();
             return;
         }
         else {
+            std::cout << e.what() << std::endl;
             throw std::exception("failed to decrypt aes key.");
         }
     }
@@ -91,11 +95,18 @@ void ResponseHandler::handle_aes_key(Message& response) {
     this->session.reset_tries();
 
     this->session.set_request_code(1028);
+
+    // printing for video
+    std::cout << "handling response with aes key: " << utils::bytes_to_hex_string(this->session.get_aes_key()) << std::endl;
 }
 
 void ResponseHandler::handle_crc(Message& response) {
     uint32_t cksum;
     response >> cksum;
+
+    // printing for video
+    std::cout << "handling response with crc: " << cksum << std::endl;
+    // printing for video
 
     if (cksum == this->session.get_cksum()) {
         // 1029

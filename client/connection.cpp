@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <iostream>
 #include "connection.h"
 #include "message.h"
 #include "utils.h"
@@ -16,8 +17,9 @@ void Connection::connect() {
         boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(this->address, this->port);
         boost::asio::connect(this->socket, endpoint);
     }
-    catch (...) {
+    catch (std::exception& e) {
         // fail to connect
+        std::cout << e.what() << std::endl;
         throw std::exception("failed to connect.");
     }
 }
@@ -33,8 +35,9 @@ void Connection::send(const Message& message) {
         // write payload
         boost::asio::write(this->socket, boost::asio::buffer(message.payload.data(), message.payload.size()));
     }
-    catch (...) {
+    catch (std::exception& e) {
         // error writing to server
+        std::cout << e.what() << std::endl;
         throw std::exception("failed to send to the server.");
     }
 }
@@ -50,8 +53,9 @@ void Connection::receive(Message& message) {
         message.payload.resize(message.header.payload_size);
         boost::asio::read(this->socket, boost::asio::buffer(message.payload.data(), message.payload.size()));
     }
-    catch (const std::exception&) {
+    catch (std::exception& e) {
         // error reading from server
+        std::cout << e.what() << std::endl;
         throw std::exception("failed to read from the server");
     }
 }

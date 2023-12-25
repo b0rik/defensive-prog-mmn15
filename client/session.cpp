@@ -31,8 +31,28 @@ uint8_t Session::get_tries() const { return this->tries; }
 uint32_t Session::get_cksum() const { return this->cksum; }
 uint16_t Session::get_request_code() const { return this->request_code; }
 
-void Session::set_id(const std::string id) { this->id = id; }
-void Session::set_public_rsa_key(const std::string public_rsa_key) { this->public_rsa_key = public_rsa_key; }
+void Session::set_id(const std::string id) { 
+    if (id.size() == CLIENT_ID_SIZE * 2) {
+        this->id = id; 
+    }
+    else {
+        std::ostringstream oss;
+        oss << "cant set id in session, must be of length " << CLIENT_ID_SIZE * 2 << "in hex";
+        throw std::exception(oss.str().c_str());
+    }
+}
+
+void Session::set_public_rsa_key(const std::string public_rsa_key) {
+    if (public_rsa_key.size() == PUBLIC_RSA_KEY_SIZE) {
+        this->public_rsa_key = public_rsa_key; 
+    }
+    else {
+        std::ostringstream oss;
+        oss << "cant set public rsa key in session, must be of length " << PUBLIC_RSA_KEY_SIZE;
+        throw std::exception(oss.str().c_str());
+    }
+}
+
 void Session::set_private_rsa_key(const std::string private_rsa_key) { this->private_rsa_key = private_rsa_key; }
 void Session::set_aes_key(const std::string aes_key) { this->aes_key = aes_key; }
 void Session::set_cksum(const uint32_t cksum) { this->cksum = cksum; }
@@ -61,18 +81,32 @@ void Session::process_info_file() {
         // read name
         this->name = file_wrapper::get_line_from_file(INFO_NAME_LINE, INFO_FILE);
         if (name.empty()) {
-            throw std::exception("no name provided.");
+            throw std::exception("no name provided in info file.");
+        }
+
+        if (name.size() > NAME_SIZE) {
+            std::ostringstream oss;
+            oss << "name provided in info file is too long, max length is: " << NAME_SIZE;
+            throw std::exception(oss.str().c_str());
         }
 
         // read file_name
         this->file_name = file_wrapper::get_line_from_file(FILE_NAME_LINE, INFO_FILE);
         if (file_name.empty()) {
-            throw std::exception("no file name provided.");
+            throw std::exception("no file name provided in info file.");
+        }
+
+        if (file_name.size() > FILE_NAME_SIZE) {
+            std::ostringstream oss;
+            oss << "file name in info file provided is too long, max length is: " << FILE_NAME_SIZE;
+            throw std::exception(oss.str().c_str());
         }
     }
     catch (std::exception& e) {
         std::cout << e.what() << std::endl;
-        throw std::exception(std::string("failed to process info file: " + INFO_FILE).c_str());
+        std::ostringstream oss;
+        oss << "failed to process info file: " << INFO_FILE;
+        throw std::exception(oss.str().c_str());
 
     }
 }
@@ -100,7 +134,9 @@ void Session::process_user_file() {
             size_t hex_id_size = CLIENT_ID_SIZE * 2;
             
             if (id.size() != hex_id_size) {
-                throw std::exception(std::string("wrong size id. expected size " + hex_id_size).c_str());
+                std::ostringstream oss;
+                oss << "wrong size id. expected size " << hex_id_size;
+                throw std::exception(oss.str().c_str());
             }
 
             std::string private_rsa_key = file_wrapper::get_file_from_line(USER_FILE, PRIVATE_RSA_KEY_LINE);
@@ -113,7 +149,9 @@ void Session::process_user_file() {
         }
         catch (std::exception& e) {
             std::cout << e.what() << std::endl;
-            throw std::exception(std::string("failed to process user file: " + USER_FILE).c_str());
+            std::ostringstream oss;
+            oss << "failed to process user file: " << USER_FILE;
+            throw std::exception(oss.str().c_str());
         }
     }
     else {
@@ -138,7 +176,9 @@ void Session::process_key_file() {
         }
         catch (std::exception& e) {
             std::cout << e.what() << std::endl;
-            throw std::exception(std::string("failed to process key file: " + KEY_FILE).c_str());
+            std::ostringstream oss;
+            oss << "failed to process key file: " << KEY_FILE;
+            throw std::exception(oss.str().c_str());
         }
     }
 }
